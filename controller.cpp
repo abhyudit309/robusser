@@ -19,7 +19,7 @@ void sighandler(int sig)
 using namespace std;
 using namespace Eigen;
 
-const string robot_file = "./resources/mmp_panda.urdf";
+const string robot_file = "./resources/robusser_robot.urdf";
 
 #include "redis_keys.h"
 

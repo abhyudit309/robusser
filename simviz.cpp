@@ -26,9 +26,9 @@ void sighandler(int){fSimulationRunning = false;}
 using namespace std;
 using namespace Eigen;
 
-const string world_file = "./resources/world_mmp_panda.urdf";
-const string robot_file = "./resources/mmp_panda.urdf";
-const string robot_name = "mmp_panda";
+const string world_file = "./resources/world_robusser.urdf";
+const string robot_file = "./resources/robusser_robot.urdf";
+const string robot_name = "robusser";
 const string camera_name = "camera_fixed";
 
 // redis keys:
