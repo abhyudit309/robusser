@@ -22,6 +22,9 @@ Arms positioned such that they can reach both the table top and dishwasher down 
    - Depth of robot gripper
 
 ## Installation Instructions
+Simply clone this repository in the directory corresponding to the cs225a repository.
 ```
-TBD
+cd cs225a
+git clone https://github.com/dihim/robusser.git
+cd robusser
 ```
