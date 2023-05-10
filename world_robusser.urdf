@@ -23,7 +23,7 @@
 	</camera>
 
 	<dynamic_object name="plate">
-		<origin xyz="-0.3 0.0 0" rpy="0 0 0" />
+		<origin xyz="-0.3 0.8 0.29" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0 0 0" rpy="0 0 0" />
         	<mass value="10" />
@@ -33,12 +33,12 @@
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/plate_0510/plate_0510.obj"/>
+	            <mesh filename="../../robusser/components/plate_0510/plate_0510.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 
 	    <collision>
-	        <origin xyz="0 0 0.06" rpy="0 0 0" />
+	        <origin xyz="0 0 0.03" rpy="0 0 0" />
 	        <geometry>
 	            <box size="0.1 0.1 0.15" />
 	        </geometry>
@@ -46,16 +46,16 @@
 	</dynamic_object>
 
 	<static_object name="table">
-		<origin xyz="-0.3 0.0 0" rpy="0 0 0"/>
+		<origin xyz="-0.3 0.8 0.25" rpy="0 0 0"/>
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0"/>
 			<geometry>
-	            <mesh filename="../../robusser/components/table_0510/table_0510.obj"/>
+	            <mesh filename="../../robusser/components/table_0510/table_0510.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 
 	    <collision>
-	        <origin xyz="0 0 0.06" rpy="0 0 0" />
+	        <origin xyz="0 0 0.03" rpy="0 0 0" />
 	        <geometry>
 	            <box size="0.1 0.1 0.15" />
 	        </geometry>
@@ -63,20 +63,47 @@
 	</static_object>
 
 	<static_object name="side_cabinet">
-		<origin xyz="-0.3 0.0 0" rpy="0 0 0" />
+		<origin xyz="-0.3 0.8 0.25" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/side_cabinet_0510/side_cabinet_0510.obj" />
+	            <mesh filename="../../robusser/components/side_cabinet_0510/side_cabinet_0510.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 
 	    <collision>
-	        <origin xyz="0 0 0.06" rpy="0 0 0" />
+	        <origin xyz="0 0 0.03" rpy="0 0 0" />
 	        <geometry>
 	            <box size="0.1 0.1 0.15" />
 	        </geometry>
 	    </collision>
+	</static_object>
+
+	<static_object name="side_cabinet2">
+		<origin xyz="-0.7 -0.05 0.25" rpy="0 0 -1.5707" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/side_cabinet_0510/side_cabinet_0510.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+
+	    <collision>
+	        <origin xyz="0 0 0.03" rpy="0 0 0" />
+	        <geometry>
+	            <box size="0.1 0.1 0.15" />
+	        </geometry>
+	    </collision>
+	</static_object>
+
+	<static_object name="floor">
+		<origin xyz="0 1 -0.33" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <box size="5 5 0.01" />
+	        </geometry>
+	    </visual>
 	</static_object>
 
 </world>
