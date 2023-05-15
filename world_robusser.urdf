@@ -22,86 +22,172 @@
 		<lookat xyz="0.0 0.0 0.5" />
 	</camera>
 
-	<dynamic_object name="plate">
-		<origin xyz="-0.3 0.8 0.29" rpy="0 0 0" />
-		<inertial>
-        	<origin xyz="0 0 0" rpy="0 0 0" />
-        	<mass value="10" />
-        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
-      	</inertial>
-
+	<static_object name="bowl">
+		<origin xyz="0 0 0" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/plate_0510/plate_0510.obj" scale="20 20 20"/>
+	            <mesh filename="../../robusser/components/bowl_0515/bowl_0515.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-
-	    <collision>
-	        <origin xyz="0 0 0.03" rpy="0 0 0" />
-	        <geometry>
-	            <box size="0.1 0.1 0.15" />
-	        </geometry>
-	    </collision>
-	</dynamic_object>
-
-	<static_object name="table">
-		<origin xyz="-0.3 0.8 0.25" rpy="0 0 0"/>
-	    <visual>
-	        <origin xyz="0 0 0" rpy="0 0 0"/>
-			<geometry>
-	            <mesh filename="../../robusser/components/table_0510/table_0510.obj" scale="20 20 20"/>
-	        </geometry>
-	    </visual>
-
-	    <collision>
-	        <origin xyz="0 0 0.03" rpy="0 0 0" />
-	        <geometry>
-	            <box size="0.1 0.1 0.15" />
-	        </geometry>
-	    </collision>
 	</static_object>
 
-	<static_object name="side_cabinet">
-		<origin xyz="-0.3 0.8 0.25" rpy="0 0 0" />
+	<static_object name="cabinets">
+		<origin xyz="0 0 0" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/side_cabinet_0510/side_cabinet_0510.obj" scale="20 20 20"/>
+	            <mesh filename="../../robusser/components/cabinets_0515/cabinets_0515.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-
-	    <collision>
-	        <origin xyz="0 0 0.03" rpy="0 0 0" />
-	        <geometry>
-	            <box size="0.1 0.1 0.15" />
-	        </geometry>
-	    </collision>
 	</static_object>
 
-	<static_object name="side_cabinet2">
-		<origin xyz="-0.7 -0.05 0.25" rpy="0 0 -1.5707" />
+	<static_object name="charger">
+		<origin xyz="0 0 0" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/side_cabinet_0510/side_cabinet_0510.obj" scale="20 20 20"/>
+	            <mesh filename="../../robusser/components/charger_0515/charger_0515.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
+	</static_object>
 
-	    <collision>
-	        <origin xyz="0 0 0.03" rpy="0 0 0" />
-	        <geometry>
-	            <box size="0.1 0.1 0.15" />
+	<static_object name="dishwasher">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/dishwasher_0515/dishwasher_0515.obj" scale="20 20 20"/>
 	        </geometry>
-	    </collision>
+	    </visual>
+	</static_object>
+
+	<static_object name="drying_mat">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/drying_mat_0515/drying_mat_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
 	</static_object>
 
 	<static_object name="floor">
-		<origin xyz="0 1 -0.33" rpy="0 0 0" />
+		<origin xyz="0 0 0" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <box size="5 5 0.01" />
+	            <mesh filename="../../robusser/components/floor_0515/floor_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="glass">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/glass_0515/glass_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="plate">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/plate_0515/plate_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="refrigerator">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/refrigerator_0515/refrigerator_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="sink">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/sink_0515/sink_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="stool1">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/stool1_0515/stool1_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="stool2">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/stool2_0515/stool2_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="stool3">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/stool3_0515/stool3_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="stool4">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/stool4_0515/stool4_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="table">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/table_0515/table_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="trash">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/trash_0515/trash_0515.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="walls">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/walls_0515/walls_0515.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
