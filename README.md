@@ -1,7 +1,7 @@
 # Robusser: Dish Washing Robot
 
 <p align="center">
-<img width="350" alt="Screen Shot 2023-05-09 at 11 59 48 PM" src="https://github.com/dihim/robusser/assets/57520931/0c55c60d-49ac-45b2-b00d-d5d5d0da7bcf">
+<img width="600" alt="Screen Shot 2023-05-09 at 11 59 48 PM" src="https://github.com/dihim/robusser/assets/57520931/62565511-ca41-4214-b60f-fcd865f6f3d4">
 </p>
 
 ## Project Overview 
