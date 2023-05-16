@@ -61,6 +61,14 @@ bool fTransZn = false;
 bool fRotPanTilt = false;
 bool fRobotLinkSelect = false;
 
+bool transXp = false;
+bool transXn = false;
+bool transYp = false;
+bool transYn = false;
+
+double x_vel = 0;
+double y_vel = 0;
+
 int main() {
 	cout << "Loading URDF world model file: " << world_file << endl;
 
@@ -212,6 +220,24 @@ int main() {
 			Eigen::Matrix3d m_pan; m_pan = Eigen::AngleAxisd(compass, -cam_up_axis);
 			camera_pos = camera_lookat + m_pan*(camera_pos - camera_lookat);
 		}
+		if (transXp) {
+			x_vel = 0.0005;
+		}
+		if (transXn) {
+			x_vel = -0.0005;
+		}
+		if (!transXp && !transXn) {
+			x_vel = 0;
+		}
+		if (transYp) {
+			y_vel = 0.0005;
+		}
+		if (transYn) {
+			y_vel = -0.0005;
+		}
+		if (!transYp && !transYn) {
+			y_vel = 0;
+		}
 		graphics->setCameraPose(camera_name, camera_pos, cam_up_axis, camera_lookat);
 		glfwGetCursorPos(window, &last_cursorx, &last_cursory);
 
@@ -263,6 +289,10 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 	VectorXd command_torques = VectorXd::Zero(dof);
 	redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
 
+	redis_client.createWriteCallback(0);
+	redis_client.addDoubleToWriteCallback(0, X_VEL_KEY, x_vel);
+	redis_client.addDoubleToWriteCallback(0, Y_VEL_KEY, y_vel);
+
 	// create a timer
 	LoopTimer timer;
 	timer.initializeTimer();
@@ -309,6 +339,8 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 		// write new robot state to redis
 		redis_client.setEigenMatrixJSON(JOINT_ANGLES_KEY, robot->_q);
 		redis_client.setEigenMatrixJSON(JOINT_VELOCITIES_KEY, robot->_dq);
+
+		redis_client.executeWriteCallback(0);
 
 		//update last time
 		last_time = curr_time;
@@ -372,6 +404,18 @@ void keySelect(GLFWwindow* window, int key, int scancode, int action, int mods)
 			break;
 		case GLFW_KEY_Z:
 			fTransZn = set;
+			break;
+		case GLFW_KEY_I:
+			transYn = set;
+			break;
+		case GLFW_KEY_K:
+			transYp = set;
+			break;
+		case GLFW_KEY_J:
+			transXp = set;
+			break;
+		case GLFW_KEY_L:
+			transXn = set;
 			break;
 		default:
 			break;

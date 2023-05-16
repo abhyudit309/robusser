@@ -51,18 +51,18 @@
 	            <mesh filename="../../robusser/components/cabinets/cabinets.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-		<!-- <collision>
+		<collision>
 	        <origin xyz="-3.1351 -0.3 0.2715" rpy="0 0 0" />
 			<geometry>
-				<box size="0.67336 4.7824 0.57253" />
+				<box size="0.70336 5.0824 0.57348" />
 			</geometry>
 	    </collision>
 		<collision>
 	        <origin xyz="-0.343245 -2.28172 0.2715" rpy="0 0 0" />
 			<geometry>
-				<box size="4.8064 0.62524 0.57348" />
+				<box size="4.8064 0.80524 0.57348" />
 			</geometry>
-	    </collision> -->
+	    </collision>
 	</static_object>
 
 	<static_object name="charger">
@@ -246,18 +246,26 @@
 				<box size="0.0572533 0.0552266666 0.57253333" />
 			</geometry>
 		</collision>
+	</static_object>
+
+	<static_object name="table_collision1">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 		<collision>
 			<origin xyz="0.4656 -0.4362 0.2715" rpy="0 0 0" />
 			<geometry>
 				<box size="0.0572533 0.0552266666 0.57253333" />
 			</geometry>
 		</collision>
-			<origin xyz="-0.90665 -0.4362 0.2715" rpy="0 0 0" />
 		<collision>
+			<origin xyz="-0.90665 -0.4362 0.2715" rpy="0 0 0" />
 			<geometry>
 				<box size="0.0572533 0.0552266666 0.57253333" />
 			</geometry>
 		</collision>
+	</static_object>
+
+	<static_object name="table_collision2">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 		<collision>
 			<origin xyz="-0.90665 0.4293 0.2715" rpy="0 0 0" />
 			<geometry>

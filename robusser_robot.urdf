@@ -41,6 +41,12 @@
         <mesh filename="../../../model/mmp_panda/meshes/panda_BaseCombo.obj" />
       </geometry>
     </visual>
+    <collision>
+      <origin xyz="0 0 -0.15" rpy="0 0 0" />
+      <geometry>
+        <box size="0.44 0.44 0.3" />
+      </geometry>
+    </collision>
   </link>
 
   <!-- PANDA ARM LINKS --> 
@@ -55,11 +61,11 @@
         <mesh filename="../../../model/panda/meshes/visual/link1.obj"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link1.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link2">
     <inertial>
@@ -72,11 +78,11 @@
         <mesh filename="../../../model/panda/meshes/visual/link2.obj"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link2.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link3">
     <inertial>
@@ -89,11 +95,11 @@
         <mesh filename="../../../model/panda/meshes/visual/link3.obj"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link3.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link4">
     <inertial>
@@ -106,11 +112,11 @@
         <mesh filename="../../../model/panda/meshes/visual/link4.obj"/>
       </geometry>
     </visual>
-<!--       <collision>
+      <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link4.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link5">
     <inertial>
@@ -123,11 +129,11 @@
         <mesh filename="../../../model/panda/meshes/visual/link5.obj"/>
       </geometry>
     </visual>
-<!--       <collision>
+      <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link5.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link6">
     <inertial>
@@ -140,77 +146,78 @@
         <mesh filename="../../../model/panda/meshes/visual/link6.obj"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/link6.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="link7">
-      <inertial>
-        <origin xyz="0 0 0.17" rpy="0 -0 0" />
-        <mass value="1.8" />
-        <inertia ixx="0.09" iyy="0.05" izz="0.07" ixy="0" ixz="0" iyz="0" />
-      </inertial>
-      <visual>
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/visual/link7.obj"/>
-        </geometry>
-      </visual>
-      <!-- <collision>
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/collision/link7.obj"/>
-        </geometry>
-      </collision> -->
-      <visual>
-        <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/visual/hand.obj"/>
-        </geometry>
-      </visual>
-<!--       <collision>
-        <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/collision/hand.obj"/>
-        </geometry>
-      </collision> -->
-    </link>
-    <link name="leftfinger">
-      <inertial>
-        <origin xyz="0 0 0.05" rpy="0 -0 0" />
-        <mass value="0.1" />
-        <inertia ixx="0.01" iyy="0.01" izz="0.005" ixy="0" ixz="0" iyz="0" />
-      </inertial>
-      <visual>
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/visual/finger.obj"/>
-        </geometry>
-      </visual>
-<!--       <collision>
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
-        </geometry>
-      </collision> -->
-    </link>
-    <link name="rightfinger">
-      <inertial>
-        <origin xyz="0 0 0.05" rpy="0 -0 0" />
-        <mass value="0.1" />
-        <inertia ixx="0.01" iyy="0.01" izz="0.005" ixy="0" ixz="0" iyz="0" />
-      </inertial>
-      <visual>
-        <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/visual/finger.obj"/>
-        </geometry>
-      </visual>
-<!--       <collision>
-        <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
-        <geometry>
-          <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
-        </geometry>
-      </collision> -->
-    </link>
+    <inertial>
+      <origin xyz="0 0 0.17" rpy="0 -0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.09" iyy="0.05" izz="0.07" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/visual/link7.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/collision/link7.obj"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/visual/hand.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/collision/hand.obj"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="leftfinger">
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 -0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.01" iyy="0.01" izz="0.005" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/visual/finger.obj"/>
+      </geometry>
+    </visual>
+    <!-- <collision>
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
+      </geometry>
+    </collision> -->
+  </link>
+  <link name="rightfinger">
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 -0 0" />
+      <mass value="0.1" />
+      <inertia ixx="0.01" iyy="0.01" izz="0.005" ixy="0" ixz="0" iyz="0" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/visual/finger.obj"/>
+      </geometry>
+    </visual>
+    <!-- <collision>
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
+      <geometry>
+        <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
+      </geometry>
+    </collision> -->
+  </link>
 
 
   <!-- JOINTS -->
@@ -314,81 +321,20 @@
   </joint>
 
   <joint name="finger_joint1" type="prismatic">
-      <parent link="link7"/>
-      <child link="leftfinger"/>
-      <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
-      <axis xyz="0 1 0"/>
-      <calibration rising="0.02" />
-      <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
-    </joint>
-    <joint name="finger_joint2" type="prismatic">
-      <parent link="link7"/>
-      <child link="rightfinger"/>
-      <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
-      <axis xyz="0 1 0"/>
-      <calibration rising="-0.02" />
-      <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
-      <!-- <mimic joint="finger_joint1" /> -->
-    </joint>
-<!--
-   <joint name="joint1" type="revolute">
-    <origin xyz="0 0 0.48643" rpy="3.1416 2.7629E-18 -3.14" />
-    <parent link="base_link" />
-    <child link="link1" />
-    <axis xyz="0 0 1" />
-    <limit lower="-10" upper="10" effort="39" velocity="0.8727" />
+    <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
+    <parent link="link7"/>
+    <child link="leftfinger"/>
+    <axis xyz="0 1 0"/>
+    <calibration rising="0.02" />
+    <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
   </joint>
-
-  <joint name="joint2" type="revolute">
-    <origin xyz="0 0.005375 -0.12838" rpy="1.5708 2.1343E-17 -1.1102E-16" />
-    <parent link="link1" />
-    <child link="link2" />
-    <axis xyz="0 0 1" />
-    <calibration falling="-45.0" />
-    <limit lower="-10" upper="10" effort="39" velocity="0.8727" />
+  <joint name="finger_joint2" type="prismatic">
+    <origin xyz="0 0 0.1654" rpy="0 0 -0.78539816339"/>
+    <parent link="link7"/>
+    <child link="rightfinger"/>
+    <axis xyz="0 1 0"/>
+    <calibration rising="-0.02" />
+    <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
+    <!-- <mimic joint="finger_joint1" /> -->
   </joint>
-
-  <joint name="joint3" type="revolute">
-    <origin xyz="0 -0.21038 -0.006375" rpy="-1.5708 1.2326E-32 -2.9122E-16" />
-    <parent link="link2" />
-    <child link="link3" />
-    <axis xyz="0 0 1" />
-    <limit lower="-10" upper="10" effort="39" velocity="0.8727" />
-  </joint>
-
-  <joint name="joint4" type="revolute">
-    <origin xyz="0 0.006375 -0.21038" rpy="1.5708 -6.6954E-17 -1.6653E-16" />
-    <parent link="link3" />
-    <child link="link4" />
-    <axis xyz="0 0 1" />
-    <calibration falling="-125.0" />
-    <limit lower="-10" upper="10" effort="39" velocity="0.8727" />
-  </joint>
-
-  <joint name="joint5" type="revolute">
-    <origin xyz="0 -0.20843 -0.006375" rpy="-1.5708 2.2204E-16 -6.373E-17" />
-    <parent link="link4" />
-    <child link="link5" />
-    <axis xyz="0 0 1" />
-    <limit lower="-10" upper="10" effort="9" velocity="0.8727" />
-  </joint>
-
-  <joint name="joint6" type="revolute">
-    <origin xyz="0 0.00017505 -0.10593" rpy="1.5708 9.2076E-28 -8.2157E-15" />
-    <parent link="link5" />
-    <child link="link6" />
-    <axis xyz="0 0 1" />
-    <calibration falling="80.0" />
-    <limit lower="-10" upper="10" effort="9" velocity="0.8727" />
-  </joint>
-
-  <joint name="joint7" type="revolute">
-    <origin xyz="0 -0.10593 -0.00017505" rpy="-1.5708 -5.5511E-17 9.6396E-17" />
-    <parent link="link6" />
-    <child link="link7" />
-    <axis xyz="0 0 1" />
-    <limit lower="-10" upper="10" effort="9" velocity="0.8727" />
-  </joint>
--->
-  
 </robot> 

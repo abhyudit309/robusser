@@ -96,6 +96,13 @@ int main() {
 	q_desired << -30.0, -15.0, -15.0, -105.0, 0.0, 90.0, 45.0;
 	q_desired *= M_PI/180.0;
 	arm_joint_task->_desired_position = q_desired;
+
+	double x_vel = 0;
+	double y_vel = 0;
+
+	redis_client.createReadCallback(0);
+	redis_client.addDoubleToReadCallback(0, X_VEL_KEY, x_vel);
+	redis_client.addDoubleToReadCallback(0, Y_VEL_KEY, y_vel);
 	
 	// create a timer
 	LoopTimer timer;
@@ -108,7 +115,7 @@ int main() {
 		// wait for next scheduled loop
 		timer.waitForNextLoop();
 		double time = timer.elapsedTime() - start_time;
-		
+		redis_client.executeReadCallback(0);
 		
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
@@ -116,11 +123,9 @@ int main() {
 		robot->updateModel();
 
 		// sample desired set points
-		x_desired = x_init + Vector3d(0.2 * sin(time), 0.2 * sin(time), 0 * sin(time));
-		x_desired(0) += base_pose_desired(0);  // need to update the "base" position of the robot arm 
-		x_desired(1) += base_pose_desired(1);
-		base_pose_desired = base_pose_init + Vector3d(0.2 * sin(time), 0.2 * sin(time), 0.2 * sin(time));  // if following trajectory (take care of conflicting motions)
-		// base_pose_desired = base_pose_init;  // if holding 
+		x_desired += Vector3d(x_vel, y_vel, 0);
+		base_pose_desired += Vector3d(x_vel, y_vel, 0); 
+		cout << robot->_q << endl << endl;
 
 		// set controller inputs
 		posori_task->_desired_position = x_desired;
