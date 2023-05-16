@@ -2,9 +2,9 @@
 
 <world name="demo_world" gravity="0.0 0.0 -9.81">
 
-	<robot name="robusser">
-		<origin xyz="2.4 1.7 0" />
-		<model dir="./resources" path="robusser_robot.urdf" name="robusser" />
+	<robot name="panda_arm_hand">
+		<origin xyz="0 0 0.25"/>
+		<model dir="./resources" path="panda_arm_hand.urdf" name="panda_arm_hand" />
 	</robot>
 
 	<light name="light1" type="directional">
@@ -146,7 +146,7 @@
 	    </visual>
 	</static_object>
 	
-	<static_object name="plate">
+	<dynamic_object name="plate">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -154,7 +154,18 @@
 	            <mesh filename="../../robusser/components/plate/plate.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-	</static_object>
+		<inertial>
+        	<origin xyz="0 0 0" rpy="0 0 0" />
+        	<mass value="10" />
+        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+      	</inertial>
+	    <collision>
+	        <origin xyz="0 0 0.06" rpy="0 0 0" />
+	        <geometry>
+	            <box size="0.1 0.1 0.15" />
+	        </geometry>
+	    </collision>
+	</dynamic_object>
 	
 	<static_object name="pot">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
