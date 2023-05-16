@@ -97,6 +97,20 @@ int main() {
 	q_desired *= M_PI/180.0;
 	arm_joint_task->_desired_position = q_desired;
 
+	// gripper (posture) task
+	vector<int> gripper_selection{10, 11};
+	auto gripper_joint_task = new Sai2Primitives::PartialJointTask(robot, gripper_selection);
+	gripper_joint_task->_use_interpolation_flag = false;
+
+	VectorXd gripper_torques = VectorXd::Zero(dof);
+	gripper_joint_task->_kp = 100;
+	gripper_joint_task->_kv = 20;
+
+	// set the desired posture
+	VectorXd gripper_desired = VectorXd::Zero(2);
+	gripper_desired << 0.02, -0.02;
+	gripper_joint_task->_desired_position = gripper_desired;
+
 	double x_vel = 0;
 	double y_vel = 0;
 
@@ -131,6 +145,7 @@ int main() {
 		posori_task->_desired_position = x_desired;
 		base_task->_desired_position = base_pose_desired;
 		arm_joint_task->_desired_position = q_desired;
+		gripper_joint_task->_desired_position = gripper_desired;
 
 		// update task model and set hierarchy
 		/*
@@ -142,6 +157,7 @@ int main() {
 		base_task->updateTaskModel(N_prec);
 		N_prec = base_task->_N;	
 		arm_joint_task->updateTaskModel(N_prec);
+		gripper_joint_task->updateTaskModel(N_prec);
 
 		// /*
 		// 	base-driven motion hieararchy: base -> arm -> arm nullspace 
@@ -157,8 +173,9 @@ int main() {
 		posori_task->computeTorques(posori_task_torques);
 		base_task->computeTorques(base_task_torques);
 		arm_joint_task->computeTorques(arm_joint_task_torques);
+		gripper_joint_task->computeTorques(gripper_torques);
 
-		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques;
+		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques + gripper_torques;
 
 		// send to redis
 		redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
