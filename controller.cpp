@@ -83,6 +83,19 @@ int main() {
 	VectorXd base_pose_init = base_pose_desired;
 
 	// joint (posture) task
+	vector<int> gripper_selection{10, 11};
+	auto gripper_task = new Sai2Primitives::PartialJointTask(robot, gripper_selection);
+	gripper_task->_use_interpolation_flag = false;
+
+	VectorXd gripper_task_torques = VectorXd::Zero(dof);
+	gripper_task->_kp = 100;
+	gripper_task->_kv = 20;
+
+	// set the desired posture
+	Vector2d gripper_desired = Vector2d(0.02, -0.02);
+	gripper_task->_desired_position = gripper_desired;
+
+	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
 	auto arm_joint_task = new Sai2Primitives::PartialJointTask(robot, arm_joint_selection);
 	arm_joint_task->_use_interpolation_flag = false;
@@ -125,7 +138,6 @@ int main() {
 		// sample desired set points
 		x_desired += Vector3d(x_vel, y_vel, 0);
 		base_pose_desired += Vector3d(x_vel, y_vel, 0); 
-		cout << robot->_q << endl << endl;
 
 		// set controller inputs
 		posori_task->_desired_position = x_desired;
@@ -158,8 +170,11 @@ int main() {
 		base_task->computeTorques(base_task_torques);
 		arm_joint_task->computeTorques(arm_joint_task_torques);
 
-		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques;
+		gripper_task->computeTorques(gripper_task_torques);
 
+		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques;
+		command_torques.tail(2) = gripper_task_torques.tail(2);
+		cout << command_torques << endl;
 		// send to redis
 		redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
 

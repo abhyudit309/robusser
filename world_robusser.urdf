@@ -115,7 +115,7 @@
 	    </visual>
 	</static_object>
 	
-	<static_object name="glass">
+	<!-- <static_object name="glass">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -124,7 +124,7 @@
 				<color rgba="1 0 0 0.6" />
 	        </geometry>
 	    </visual>
-	</static_object>
+	</static_object> -->
 	
 	<static_object name="mat">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
@@ -146,15 +146,32 @@
 	    </visual>
 	</static_object>
 	
-	<static_object name="plate">
-		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	<dynamic_object name="plate">
+		<origin xyz="0 0 -0.21" rpy="0 0 0" />
+		<inertial>
+        	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+        	<mass value="10" />
+        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+      	</inertial>
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
 	            <mesh filename="../../robusser/components/plate/plate.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-	</static_object>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.086" length="0.01368"/>
+	        </geometry>
+	    </collision>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.59994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.13" length="0.01368"/>
+	        </geometry>
+	    </collision>
+	</dynamic_object>
 	
 	<static_object name="pot">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />

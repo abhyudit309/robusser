@@ -31,6 +31,13 @@ const string robot_file = "./resources/robusser_robot.urdf";
 const string robot_name = "robusser";
 const string camera_name = "camera_fixed";
 
+const vector<string> object_names = {"plate"};
+vector<Vector3d> object_pos;
+vector<Vector3d> object_lin_vel;
+vector<Quaterniond> object_ori;
+vector<Vector3d> object_ang_vel;
+const int n_objects = object_names.size();
+
 // redis keys:
 #include "redis_keys.h"
 
@@ -101,6 +108,17 @@ int main() {
 	sim->getJointVelocities(robot_name, robot->_dq);
 	robot->updateKinematics();
 
+	for (int i = 0; i < n_objects; ++i) {
+		Vector3d _object_pos, _object_lin_vel, _object_ang_vel;
+		Quaterniond _object_ori;
+		sim->getObjectPosition(object_names[i], _object_pos, _object_ori);
+		sim->getObjectVelocity(object_names[i], _object_lin_vel, _object_ang_vel);
+		object_pos.push_back(_object_pos);
+		object_lin_vel.push_back(_object_lin_vel);
+		object_ori.push_back(_object_ori);
+		object_ang_vel.push_back(_object_ang_vel);
+	}
+
 	/*------- Set up visualization -------*/
 	// set up error callback
 	glfwSetErrorCallback(glfwError);
@@ -152,6 +170,9 @@ int main() {
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 		graphics->updateGraphics(robot_name, robot);
+		for (int i = 0; i < n_objects; ++i) {
+			graphics->updateObjectGraphics(object_names[i], object_pos[i], object_ori[i]);
+		}
 		graphics->render(camera_name, width, height);
 
 		// swap buffers
@@ -339,6 +360,11 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 		// write new robot state to redis
 		redis_client.setEigenMatrixJSON(JOINT_ANGLES_KEY, robot->_q);
 		redis_client.setEigenMatrixJSON(JOINT_VELOCITIES_KEY, robot->_dq);
+
+		for (int i = 0; i < n_objects; ++i) {
+			sim->getObjectPosition(object_names[i], object_pos[i], object_ori[i]);
+			sim->getObjectVelocity(object_names[i], object_lin_vel[i], object_ang_vel[i]);
+		}
 
 		redis_client.executeWriteCallback(0);
 
