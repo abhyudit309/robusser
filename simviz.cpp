@@ -32,7 +32,7 @@ const string robot_name = "robusser";
 const string camera_name = "camera_fixed";
 
 const vector<string> object_names = {"plate"};
-vector<Vector3d> object_pos;
+vector<Vector3d> object_pos = {Vector3d(0, -0.2, -0.21)};
 vector<Vector3d> object_lin_vel;
 vector<Quaterniond> object_ori;
 vector<Vector3d> object_ang_vel;
@@ -92,7 +92,7 @@ int main() {
 	auto graphics = new Sai2Graphics::Sai2Graphics(world_file, true);
 	Eigen::Vector3d camera_pos, camera_lookat, camera_vertical;
 	graphics->getCameraPose(camera_name, camera_pos, camera_vertical, camera_lookat);
-	graphics->_world->setBackgroundColor(66.0/255, 135.0/255, 245.0/255);  // set blue background 
+	graphics->_world->setBackgroundColor(135.0/255, 206.0/255, 235.0/255);  // set blue background 
 
 	// load robots
 	auto robot = new Sai2Model::Sai2Model(robot_file, false);
@@ -112,8 +112,10 @@ int main() {
 		Vector3d _object_pos, _object_lin_vel, _object_ang_vel;
 		Quaterniond _object_ori;
 		sim->getObjectPosition(object_names[i], _object_pos, _object_ori);
+		sim->setObjectPosition(object_names[i], object_pos[i], _object_ori);
+		
 		sim->getObjectVelocity(object_names[i], _object_lin_vel, _object_ang_vel);
-		object_pos.push_back(_object_pos);
+		//object_pos.push_back(_object_pos);
 		object_lin_vel.push_back(_object_lin_vel);
 		object_ori.push_back(_object_ori);
 		object_ang_vel.push_back(_object_ang_vel);

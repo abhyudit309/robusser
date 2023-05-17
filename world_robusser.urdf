@@ -103,6 +103,12 @@
 	            <mesh filename="../../robusser/components/floor/floor.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
+		<collision>
+	        <origin xyz="0 0 -0.01" rpy="0 0 0" />
+			<geometry>
+	            <box size="7 7 0.01"/>
+	        </geometry>
+	    </collision>
 	</static_object>
 	
 	<static_object name="fridge">
