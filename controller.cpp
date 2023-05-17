@@ -83,19 +83,6 @@ int main() {
 	VectorXd base_pose_init = base_pose_desired;
 
 	// joint (posture) task
-	vector<int> gripper_selection{10, 11};
-	auto gripper_task = new Sai2Primitives::PartialJointTask(robot, gripper_selection);
-	gripper_task->_use_interpolation_flag = false;
-
-	VectorXd gripper_task_torques = VectorXd::Zero(dof);
-	gripper_task->_kp = 100;
-	gripper_task->_kv = 20;
-
-	// set the desired posture
-	Vector2d gripper_desired = Vector2d(0.02, -0.02);
-	gripper_task->_desired_position = gripper_desired;
-
-	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
 	auto arm_joint_task = new Sai2Primitives::PartialJointTask(robot, arm_joint_selection);
 	arm_joint_task->_use_interpolation_flag = false;
@@ -109,6 +96,20 @@ int main() {
 	q_desired << -30.0, -15.0, -15.0, -105.0, 0.0, 90.0, 45.0;
 	q_desired *= M_PI/180.0;
 	arm_joint_task->_desired_position = q_desired;
+
+	// gripper (posture) task
+	vector<int> gripper_selection{10, 11};
+	auto gripper_joint_task = new Sai2Primitives::PartialJointTask(robot, gripper_selection);
+	gripper_joint_task->_use_interpolation_flag = false;
+
+	VectorXd gripper_torques = VectorXd::Zero(dof);
+	gripper_joint_task->_kp = 100;
+	gripper_joint_task->_kv = 20;
+
+	// set the desired posture
+	VectorXd gripper_desired = VectorXd::Zero(2);
+	gripper_desired << 0.02, -0.02;
+	gripper_joint_task->_desired_position = gripper_desired;
 
 	double x_vel = 0;
 	double y_vel = 0;
@@ -143,6 +144,7 @@ int main() {
 		posori_task->_desired_position = x_desired;
 		base_task->_desired_position = base_pose_desired;
 		arm_joint_task->_desired_position = q_desired;
+		gripper_joint_task->_desired_position = gripper_desired;
 
 		// update task model and set hierarchy
 		/*
@@ -154,6 +156,7 @@ int main() {
 		base_task->updateTaskModel(N_prec);
 		N_prec = base_task->_N;	
 		arm_joint_task->updateTaskModel(N_prec);
+		gripper_joint_task->updateTaskModel(N_prec);
 
 		// /*
 		// 	base-driven motion hieararchy: base -> arm -> arm nullspace 
@@ -169,12 +172,10 @@ int main() {
 		posori_task->computeTorques(posori_task_torques);
 		base_task->computeTorques(base_task_torques);
 		arm_joint_task->computeTorques(arm_joint_task_torques);
+		gripper_joint_task->computeTorques(gripper_torques);
 
-		gripper_task->computeTorques(gripper_task_torques);
+		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques + gripper_torques;
 
-		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques;
-		command_torques.tail(2) = gripper_task_torques.tail(2);
-		cout << command_torques << endl;
 		// send to redis
 		redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
 
