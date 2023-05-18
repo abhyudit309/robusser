@@ -51,7 +51,7 @@ int main() {
 
 	// pose task
 	const string control_link = "link7";
-	const Vector3d control_point = Vector3d(0,0,0.07);
+	const Vector3d control_point = Vector3d(0, 0, 0.07);
 	auto posori_task = new Sai2Primitives::PosOriTask(robot, control_link, control_point);
 
 	posori_task->_use_interpolation_flag = true;
@@ -64,10 +64,9 @@ int main() {
 	posori_task->_kv_ori = 40;
 
 	// set the current EE posiiton as the desired EE position
-	Vector3d x_desired = Vector3d::Zero(3);
-	robot->position(x_desired, control_link, control_point);
-	posori_task->_desired_position = x_desired;
-	Vector3d x_init = x_desired;
+	Vector3d x = Vector3d::Zero(3);
+	robot->position(x, control_link, control_point);
+	posori_task->_desired_position = x;
 
 	// partial joint task to control the mobile base 
 	vector<int> base_joint_selection{0, 1, 2};
@@ -128,14 +127,15 @@ int main() {
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
-		robot->position(x_desired, control_link, control_point);
+		robot->position(x, control_link, control_point);
 		robot->updateModel();
 
 		// sample desired set points
 		cout << robot->_q << endl << endl;
+		cout << x.transpose() << endl << endl;
 
 		// set controller inputs
-		posori_task->_desired_position = x_desired;
+		posori_task->_desired_position = x;
 		base_task->_desired_position = base_pose_desired;
 		arm_joint_task->_desired_position = q_desired;
 		gripper_joint_task->_desired_position = gripper_desired;
@@ -157,19 +157,19 @@ int main() {
 		*/
 		N_prec.setIdentity();
 		base_task->updateTaskModel(N_prec);
-		N_prec = base_task->_N;	
-		posori_task->updateTaskModel(N_prec);
-		N_prec = posori_task->_N;	
+		N_prec = base_task->_N;		
 		arm_joint_task->updateTaskModel(N_prec);
 		gripper_joint_task->updateTaskModel(N_prec);
+		//posori_task->updateTaskModel(N_prec);
+		//N_prec = posori_task->_N;	
 
 		// compute torques
-		posori_task->computeTorques(posori_task_torques);
+		//posori_task->computeTorques(posori_task_torques);
 		base_task->computeTorques(base_task_torques);
 		arm_joint_task->computeTorques(arm_joint_task_torques);
 		gripper_joint_task->computeTorques(gripper_torques);
 
-		command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques + gripper_torques;
+		command_torques = base_task_torques + arm_joint_task_torques + gripper_torques;
 
 		// send to redis
 		redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
