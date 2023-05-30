@@ -65,8 +65,11 @@ int main() {
 
 	// set the current EE posiiton as the desired EE position
 	Vector3d x = Vector3d::Zero(3);
-	Vector3d x_desired = Vector3d::Zero(3);
-	x_desired << 0.5, 0.5, 0.5;
+	Vector3d xd = Vector3d::Zero(3);
+	// circular trajectory
+	double Amp = 0.1;
+	double w = M_PI;
+	// x_desired << 0.5, 0.5, 0.5;
 	robot->position(x, control_link, control_point);
 
 	// partial joint task to control the mobile base 
@@ -127,13 +130,14 @@ int main() {
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
 		robot->position(x, control_link, control_point);
+		xd = Vector3d(0.3, 0.1, 0.5) + Amp * Vector3d(sin(w * time), cos(w * time), 0.0);
 		robot->updateModel();
 
 		cout << robot->_q << endl << endl;
 		cout << x.transpose() << endl << endl;
 
 		// set controller inputs
-		posori_task->_desired_position = x_desired;
+		posori_task->_desired_position = xd;
 		base_task->_desired_position = base_pose_desired;
 		arm_joint_task->_desired_position = q_desired;
 		gripper_joint_task->_desired_position = gripper_desired;

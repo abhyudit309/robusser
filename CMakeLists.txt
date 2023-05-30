@@ -6,6 +6,7 @@ add_definitions(${SAI2-PRIMITIVES_DEFINITIONS})
 # create an executable
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CS225A_BINARY_DIR}/robusser)
 ADD_EXECUTABLE (controller_robusser_robot controller.cpp ${CS225A_COMMON_SOURCE})
+ADD_EXECUTABLE (eef_mobile_base_controller_robusser_robot eef_mobile_base_controller.cpp ${CS225A_COMMON_SOURCE})
 ADD_EXECUTABLE (eef_controller_robusser_robot eef_controller.cpp ${CS225A_COMMON_SOURCE})
 ADD_EXECUTABLE (mobile_base_controller_robusser_robot mobile_base_controller.cpp ${CS225A_COMMON_SOURCE})
 ADD_EXECUTABLE (simviz_robusser_robot simviz.cpp ${CS225A_COMMON_SOURCE})
@@ -13,6 +14,7 @@ ADD_EXECUTABLE (simviz_robusser_robot simviz.cpp ${CS225A_COMMON_SOURCE})
 # and link the library against the executable
 TARGET_LINK_LIBRARIES (controller_robusser_robot ${CS225A_COMMON_LIBRARIES} ${SAI2-PRIMITIVES_LIBRARIES})
 TARGET_LINK_LIBRARIES (eef_controller_robusser_robot ${CS225A_COMMON_LIBRARIES} ${SAI2-PRIMITIVES_LIBRARIES})
+TARGET_LINK_LIBRARIES (eef_mobile_base_controller_robusser_robot ${CS225A_COMMON_LIBRARIES} ${SAI2-PRIMITIVES_LIBRARIES})
 TARGET_LINK_LIBRARIES (mobile_base_controller_robusser_robot ${CS225A_COMMON_LIBRARIES} ${SAI2-PRIMITIVES_LIBRARIES})
 TARGET_LINK_LIBRARIES (simviz_robusser_robot ${CS225A_COMMON_LIBRARIES} ${SAI2-PRIMITIVES_LIBRARIES})
 

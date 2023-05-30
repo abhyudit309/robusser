@@ -80,7 +80,7 @@ int main() {
 	base_task->_kv = 40;
 	
 	VectorXd base_pose_desired = initial_q.head(3);
-	base_pose_desired << -4.0, 0, 0;
+	base_pose_desired << -1.0, -1.0, 0.0;
 	base_task->_desired_position = base_pose_desired;
 
 	// joint (posture) task
