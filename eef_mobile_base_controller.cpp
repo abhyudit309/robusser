@@ -74,6 +74,12 @@ int main() {
 	double w = M_PI;
 	robot->position(x, control_link, control_point);
 	posori_task->_desired_position = x;
+	// array of eef poses
+	Vector3d eef_pose_array[3];
+	eef_pose_array[0] << 0.3, 0.1, 0.5;
+	eef_pose_array[1] << 0.1, 0.4, 0.6;
+	eef_pose_array[2] << 0.5, 0.2, 0.4;
+
 
 	// partial joint task to control the mobile base 
 	vector<int> base_joint_selection{0, 1, 2};
@@ -89,8 +95,12 @@ int main() {
 	VectorXd base_pose_desired = initial_q.head(3);
 	Vector3d base_xyz;
 	base_xyz << initial_q(0), initial_q(1), 0.0;
-	base_pose_desired << -1.0, -1.0, 0.0;
 	base_task->_desired_position = base_pose_desired;
+	// array of base poses
+	Vector3d base_pose_array[3];
+	base_pose_array[0] << -1.0, -1.0, 0.0;
+	base_pose_array[1] << -2.0, 0.0, 0.0;
+	base_pose_array[2] << -3.0, -1.0, 0.0;
 
 	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
@@ -128,9 +138,9 @@ int main() {
 	double start_time = timer.elapsedTime(); //secs
 	bool fTimerDidSleep = true;
 
-	bool switch_control = false;
 	int state = 0;
-	int mode = 0;
+	int counter = 0;
+	base_pose_desired = base_pose_array[counter];
 
 	while (runloop) {
 		// wait for next scheduled loop
@@ -142,17 +152,20 @@ int main() {
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
 		base_xyz << robot->_q(0), robot->_q(1), 0.0;
 		robot->position(x, control_link, control_point);
-		xd = Vector3d(0.3, 0.1, 0.5) + base_xyz;
+		xd = eef_pose_array[counter] + base_xyz;
 		robot->updateModel();
 
 		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
-			state = 1;
+			state = ARM_CONTROLLER;
+			cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
 		} 
 
 		if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER) {
-			state = 0;
-			base_pose_desired << -2.0, -0.0, 0.0;
+			state = BASE_CONTROLLER;
+			counter++;
+			base_pose_desired = base_pose_array[counter];
 			q_desired = robot->_q.segment(3, 7);
+			cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
 		}
 
 		// set controller inputs
@@ -163,7 +176,7 @@ int main() {
 
 		if (state == BASE_CONTROLLER) {
 			// put base control code here
-			std::cout << "BASE" << std::endl;
+			//std::cout << "BASE" << std::endl;
 			N_prec.setIdentity();
 			base_task->updateTaskModel(N_prec);
 			N_prec = base_task->_N;		
@@ -182,7 +195,7 @@ int main() {
 
 		else if (state == ARM_CONTROLLER) {
 			// put arm control code here
-			std::cout << "ARM" << std::endl;
+			//std::cout << "ARM" << std::endl;
 			N_prec.setIdentity();
 			posori_task->updateTaskModel(N_prec);
 			N_prec = posori_task->_N;	
@@ -204,80 +217,10 @@ int main() {
 
 		controller_counter++;
 
-		///////////////////////////////////////////////////
-
-		// wait for next scheduled loop
-		// timer.waitForNextLoop();
-		// double time = timer.elapsedTime() - start_time;
-		
-		// // read robot state from redis
-		// robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
-		// robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
-		// robot->position(x, control_link, control_point);
-		// xd = Vector3d(0.3, 0.1, 0.5) + Amp * Vector3d(sin(w * time), cos(w * time), 0.0) + robot->_q.head(3);
-		// robot->updateModel();
-
-		// if ((robot->_q.head(3) - base_pose_desired).norm() < 0.00001) {			
-		// 	switch_control = true;
-		// }
-
-		// // sample desired set points
-		// // cout << robot->_q << endl << endl;
-		// // cout << x.transpose() << endl << endl;
-
-		// cout << (robot->_q.head(3) - base_pose_desired).norm() << endl << endl;
-
-		// // set controller inputs
-		// posori_task->_desired_position = xd;
-		// base_task->_desired_position = base_pose_desired;
-		// arm_joint_task->_desired_position = q_desired;
-		// gripper_joint_task->_desired_position = gripper_desired;
-
-		// // update task model and set hierarchy
-		// // /*
-		// // 	arm-driven motion hieararchy: arm -> base -> arm nullspace
-		// // */ 
-		// // N_prec.setIdentity();
-		// // posori_task->updateTaskModel(N_prec);
-		// // N_prec = posori_task->_N;	
-		// // base_task->updateTaskModel(N_prec);
-		// // N_prec = base_task->_N;	
-		// // arm_joint_task->updateTaskModel(N_prec);
-		// // gripper_joint_task->updateTaskModel(N_prec);
-
-		// /*
-		// 	base-driven motion hieararchy: base -> arm -> arm nullspace 
-		// */
-		// N_prec.setIdentity();
-
-		// if (switch_control) {
-		// 	posori_task->updateTaskModel(N_prec);
-		// 	N_prec = posori_task->_N;
-		// }
-
-		// base_task->updateTaskModel(N_prec);
-		// N_prec = base_task->_N;		
-		// arm_joint_task->updateTaskModel(N_prec);
-		// gripper_joint_task->updateTaskModel(N_prec);
-		// //posori_task->updateTaskModel(N_prec);
-		// //N_prec = posori_task->_N;	
-
-		// // compute torques
-		// posori_task->computeTorques(posori_task_torques);
-		// base_task->computeTorques(base_task_torques);
-		// arm_joint_task->computeTorques(arm_joint_task_torques);
-		// gripper_joint_task->computeTorques(gripper_torques);
-
-		// command_torques = base_task_torques + arm_joint_task_torques + gripper_torques;
-
-		// if (switch_control) {
-		// 	command_torques += posori_task_torques;
-		// }
-
-		// // send to redis
-		// redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
-
-		// controller_counter++;
+		if (counter >= 3) {
+			cout << "EXIT!";
+			break;
+		}
 	}
 
 	double end_time = timer.elapsedTime();

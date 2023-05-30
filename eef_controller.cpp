@@ -130,7 +130,8 @@ int main() {
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
 		robot->position(x, control_link, control_point);
-		xd = Vector3d(0.3, 0.1, 0.5) + Amp * Vector3d(sin(w * time), cos(w * time), 0.0);
+		// xd = Vector3d(0.3, 0.1, 0.5) + Amp * Vector3d(sin(w * time), cos(w * time), 0.0);
+		xd = Vector3d(0.5, 0.2, 0.4);
 		robot->updateModel();
 
 		cout << robot->_q << endl << endl;
