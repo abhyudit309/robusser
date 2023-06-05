@@ -30,6 +30,19 @@ unsigned long long controller_counter = 0;
 
 const bool inertia_regularization = true;
 
+Vector2d repulsive_torque(Vector2d q, Vector2d q_obs) {
+	double eta = 5.0;
+	double dist = (q - q_obs).norm();
+	double d0 = 0.3;
+	Vector2d torque = Vector2d::Zero();
+
+	if (dist <= d0) {
+		torque = eta*(1/dist - 1/d0) * (q - q_obs) / pow(dist, 3);
+	}
+	
+	return torque;
+}
+
 int main() {
 
 	// start redis client
@@ -94,12 +107,13 @@ int main() {
 	
 	VectorXd base_pose_desired = initial_q.head(3);
 	Vector3d base_xyz;
+	Vector2d base_velocity;
 	base_xyz << initial_q(0), initial_q(1), 0.0;
 	base_task->_desired_position = base_pose_desired;
 	// array of base poses
 	Vector3d base_pose_array[3];
 	base_pose_array[0] << -1.0, -1.0, 0.0;
-	base_pose_array[1] << -2.0, 0.0, 0.0;
+	base_pose_array[1] << -4.5, -3.0, 0.0;
 	base_pose_array[2] << -3.0, -1.0, 0.0;
 
 	// joint (posture) task
@@ -138,6 +152,53 @@ int main() {
 	double start_time = timer.elapsedTime(); //secs
 	bool fTimerDidSleep = true;
 
+	Vector2d q_obs;
+	Vector2d vertex1 = Vector2d(-3.77, -2.6);
+	Vector2d vertex2 = Vector2d(-3.77, -0.9);
+	Vector2d vertex3 = Vector2d(-1.55, -0.9);
+	Vector2d vertex4 = Vector2d(-1.55, -2.6);
+
+	const int num = 10;
+	VectorXd obs_x = VectorXd::LinSpaced(num, vertex2[0], vertex3[0]);
+	VectorXd obs_y = VectorXd::LinSpaced(num, vertex1[1], vertex2[1]);
+
+	Vector2d obstacles[4*num - 4];
+	int j = 0;
+
+	for (int i = 0; i < num - 1; i++) {
+		obstacles[j] << vertex1[0], obs_y[i];
+		j++;
+	}
+	for (int i = 0; i < num - 1; i++) {
+		obstacles[j] << obs_x[i], vertex2[1];
+		j++;
+	}
+	for (int i = num - 1; i > 0; i--) {
+		obstacles[j] << vertex3[0], obs_y[i];
+		j++;
+	}
+	for (int i = num - 1; i > 0; i--) {
+		obstacles[j] << obs_x[i], vertex4[1];
+		j++;
+	}
+
+	bool goalCloseToObstacle = false;
+	double distance = 10;
+	double temp;
+	bool repulseOn = true;
+	double switch_time;
+
+	for (int i = 0; i < 4*num - 4; i++) {
+		temp = (base_pose_desired.head(2) - obstacles[i]).norm();
+		if (temp < distance) {
+			distance = temp;
+		}
+	}
+
+	if (distance < 0.3) {
+		goalCloseToObstacle = true;
+	}
+
 	int state = 0;
 	int counter = 0;
 	base_pose_desired = base_pose_array[counter];
@@ -151,6 +212,7 @@ int main() {
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
 		base_xyz << robot->_q(0), robot->_q(1), 0.0;
+		base_velocity = robot->_dq.head(2);
 		robot->position(x, control_link, control_point);
 		xd = eef_pose_array[counter] + base_xyz;
 		robot->updateModel();
@@ -166,6 +228,23 @@ int main() {
 			base_pose_desired = base_pose_array[counter];
 			q_desired = robot->_q.segment(3, 7);
 			cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
+			// reseting values
+
+			goalCloseToObstacle = false;
+			distance = 10;
+			repulseOn = true;
+			switch_time = time;
+
+			for (int i = 0; i < 4*num - 4; i++) {
+				temp = (base_pose_desired.head(2) - obstacles[i]).norm();
+				if (temp < distance) {
+					distance = temp;
+				}
+			}
+
+			if (distance < 0.3) {
+				goalCloseToObstacle = true;
+			}
 		}
 
 		// set controller inputs
@@ -183,13 +262,27 @@ int main() {
 			arm_joint_task->updateTaskModel(N_prec);
 			gripper_joint_task->updateTaskModel(N_prec);
 
+			// obstacle avoidance
+			VectorXd base_task_torques_obs = VectorXd::Zero(dof);
+
+			if (repulseOn){
+				for (int i = 0; i < 4*num - 4; i++) {
+					base_task_torques_obs.head(2) += repulsive_torque(base_xyz.head(2), obstacles[i]);
+				}
+			}
+
+			if ((time - switch_time) > 1.0 && base_velocity.norm() < 0.01 && goalCloseToObstacle && (base_xyz.head(2) - base_pose_desired.head(2)).norm() > 0.1 && repulseOn) {
+				cout << "SWITCHING OFF REPULSE";
+				repulseOn = false;
+			}
+
 			// compute torques
 			posori_task->computeTorques(posori_task_torques);
 			base_task->computeTorques(base_task_torques);
 			arm_joint_task->computeTorques(arm_joint_task_torques);
 			gripper_joint_task->computeTorques(gripper_torques);
 
-			command_torques = base_task_torques + arm_joint_task_torques + gripper_torques;
+			command_torques = base_task_torques + base_task_torques_obs + arm_joint_task_torques + gripper_torques;
 
 		}
 
