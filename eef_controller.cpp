@@ -51,7 +51,7 @@ int main() {
 
 	// pose task
 	const string control_link = "link7";
-	const Vector3d control_point = Vector3d(0,0,0.07);
+	const Vector3d control_point = Vector3d(0, 0, 0.07);
 	auto posori_task = new Sai2Primitives::PosOriTask(robot, control_link, control_point);
 
 	posori_task->_use_interpolation_flag = true;
@@ -64,9 +64,13 @@ int main() {
 	posori_task->_kv_ori = 40;
 
 	// set the current EE posiiton as the desired EE position
-	Vector3d x_desired = Vector3d::Zero(3);
-	robot->position(x_desired, control_link, control_point);
-	Vector3d x_init = x_desired;
+	Vector3d x = Vector3d::Zero(3);
+	Vector3d xd = Vector3d::Zero(3);
+	// circular trajectory
+	double Amp = 0.1;
+	double w = M_PI;
+	// x_desired << 0.5, 0.5, 0.5;
+	robot->position(x, control_link, control_point);
 
 	// partial joint task to control the mobile base 
 	vector<int> base_joint_selection{0, 1, 2};
@@ -80,7 +84,6 @@ int main() {
 	base_task->_kv = 40;
 	
 	VectorXd base_pose_desired = initial_q.head(3);
-	VectorXd base_pose_init = base_pose_desired;
 
 	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
@@ -110,13 +113,6 @@ int main() {
 	VectorXd gripper_desired = VectorXd::Zero(2);
 	gripper_desired << 0.02, -0.02;
 	gripper_joint_task->_desired_position = gripper_desired;
-
-	double x_vel = 0;
-	double y_vel = 0;
-
-	redis_client.createReadCallback(0);
-	redis_client.addDoubleToReadCallback(0, X_VEL_KEY, x_vel);
-	redis_client.addDoubleToReadCallback(0, Y_VEL_KEY, y_vel);
 	
 	// create a timer
 	LoopTimer timer;
@@ -129,19 +125,20 @@ int main() {
 		// wait for next scheduled loop
 		timer.waitForNextLoop();
 		double time = timer.elapsedTime() - start_time;
-		redis_client.executeReadCallback(0);
 		
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
+		robot->position(x, control_link, control_point);
+		// xd = Vector3d(0.3, 0.1, 0.5) + Amp * Vector3d(sin(w * time), cos(w * time), 0.0);
+		xd = Vector3d(0.5, 0.2, 0.4);
 		robot->updateModel();
 
-		// sample desired set points
-		x_desired += Vector3d(x_vel, y_vel, 0);
-		base_pose_desired += Vector3d(x_vel, y_vel, 0); 
+		cout << robot->_q << endl << endl;
+		cout << x.transpose() << endl << endl;
 
 		// set controller inputs
-		posori_task->_desired_position = x_desired;
+		posori_task->_desired_position = xd;
 		base_task->_desired_position = base_pose_desired;
 		arm_joint_task->_desired_position = q_desired;
 		gripper_joint_task->_desired_position = gripper_desired;
