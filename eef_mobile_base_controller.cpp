@@ -186,7 +186,11 @@ int main() {
 	double distance = 10;
 	double temp;
 	bool repulseOn = true;
-	double switch_time;
+	double switch_time = 0;
+
+	int state = 0;
+	int counter = 0;
+	base_pose_desired = base_pose_array[counter];
 
 	for (int i = 0; i < 4*num - 4; i++) {
 		temp = (base_pose_desired.head(2) - obstacles[i]).norm();
@@ -198,10 +202,6 @@ int main() {
 	if (distance < 0.3) {
 		goalCloseToObstacle = true;
 	}
-
-	int state = 0;
-	int counter = 0;
-	base_pose_desired = base_pose_array[counter];
 
 	while (runloop) {
 		// wait for next scheduled loop

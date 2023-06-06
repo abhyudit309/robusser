@@ -94,7 +94,7 @@ int main() {
 	base_task->_kv = 40;
 	
 	VectorXd base_pose_desired = initial_q.head(3);
-	base_pose_desired << -3.0, -1.0, 0.0;
+	base_pose_desired << -2.295, -1.0, 0.0;
 	base_task->_desired_position = base_pose_desired;
 
 	// joint (posture) task
@@ -238,11 +238,9 @@ int main() {
 			for (int i = 0; i < 4*num - 4; i++) {
 				base_task_torques_obs.head(2) += repulsive_torque(current_xy, obstacles[i]);
 			}
-			cout << "REPULSE ON!" << endl;
 		}
 
 		if (time > 1.0 && base_velocity.norm() < 0.01 && goalCloseToObstacle && (current_xy - base_pose_desired.head(2)).norm() > 0.1 && repulseOn) {
-			cout << "SWITCHING OFF REPULSE";
 			repulseOn = false;
 		}
 
