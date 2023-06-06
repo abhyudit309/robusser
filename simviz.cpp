@@ -8,9 +8,11 @@
 #include "Sai2Model.h"
 #include "Sai2Graphics.h"
 #include "Sai2Simulation.h"
+#include "parser/UrdfToSai2Graphics.h"
 #include <dynamics3d.h>
 #include "redis/RedisClient.h"
 #include "timer/LoopTimer.h"
+#include <typeinfo>
 
 #include <GLFW/glfw3.h> //must be loaded after loading opengl/glew
 
@@ -31,8 +33,8 @@ const string robot_file = "./resources/robusser_robot.urdf";
 const string robot_name = "robusser";
 const string camera_name = "camera_fixed";
 
-const vector<string> object_names = {"plate"};
-vector<Vector3d> object_pos = {Vector3d(0, -0.2, -0.21)};
+const vector<string> object_names = {"plate1", "plate2", "plate3", "plate4"};
+vector<Vector3d> object_pos = {Vector3d(0, 0, -0.21), Vector3d(-1, 0.65, -0.21), Vector3d(-1, 0, -0.21), Vector3d(0, 0.65, -0.21)};
 vector<Vector3d> object_lin_vel;
 vector<Quaterniond> object_ori;
 vector<Vector3d> object_ang_vel;
@@ -76,6 +78,8 @@ bool transYn = false;
 double x_vel = 0;
 double y_vel = 0;
 
+//cGenericObject* getGenericObjectChildRecursive(const std::string child_name, cGenericObject* parent);
+
 int main() {
 	cout << "Loading URDF world model file: " << world_file << endl;
 
@@ -108,7 +112,34 @@ int main() {
 	sim->getJointVelocities(robot_name, robot->_dq);
 	robot->updateKinematics();
 
+	// cGenericObject* object = new cGenericObject();
+
+	// for (unsigned int i = 0; i < graphics->_world->getNumChildren(); ++i) {
+	// 	auto object_ptr = graphics->_world->getChild(i);
+	// 	if (object_ptr->m_name == "plate") {
+	// 		// initialize a cGenericObject to represent this object in the world
+	// 		object->m_name = "plate2";
+	// 		// set object position and rotation
+	// 		object->setLocalPos(Vector3d(0, 0, -0.21));
+	// 		object->setLocalRot(object_ptr->getLocalRot());
+	// 		graphics->_world->addChild(object);
+
+	// 		// load object graphics, must have atleast one
+	// 		for (const auto visual_ptr: object_ptr->m_displayList) {
+	// 			Parser::loadVisualtoGenericObject(object, visual_ptr);
+	// 		}
+	// 	}
+	// }
+	
+	// cout << object->m_name << endl;
+	// test->m_name = "plate2";
+	// graphics->_world->addChild(test);
+
+	// graphics->_world->addChild(getGenericObjectChildRecursive("plate", graphics->_world)->copy());
+	// sim->_world->addChild(getGenericObjectChildRecursive("plate", sim->_world)->copy());
+
 	for (int i = 0; i < n_objects; ++i) {
+		cout << i << endl;
 		Vector3d _object_pos, _object_lin_vel, _object_ang_vel;
 		Quaterniond _object_ori;
 		sim->getObjectPosition(object_names[i], _object_pos, _object_ori);
@@ -120,6 +151,7 @@ int main() {
 		object_ori.push_back(_object_ori);
 		object_ang_vel.push_back(_object_ang_vel);
 	}
+
 
 	/*------- Set up visualization -------*/
 	// set up error callback
@@ -477,5 +509,22 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
 		default:
 			break;
 	}
+}
+
+cGenericObject* getGenericObjectChildRecursive(const std::string child_name, cGenericObject* parent) {
+	if (parent->getNumChildren() == 0) {
+		return NULL;
+	}
+	for (unsigned int i = 0; i < parent->getNumChildren(); ++i) {
+		auto child = parent->getChild(i);
+		if (child->m_name == child_name) {
+			return child;
+		}
+		auto descendent = getGenericObjectChildRecursive(child_name, child);
+		if (NULL != descendent) {
+			return descendent;
+		}
+	}
+	return NULL;
 }
 

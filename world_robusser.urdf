@@ -32,7 +32,7 @@
 	        </geometry>
 	    </visual>
 	</static_object>
-
+<!-- 
 	<static_object name="bowl">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
@@ -41,7 +41,7 @@
 	            <mesh filename="../../robusser/components/bowl/bowl.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-	</static_object>
+	</static_object> -->
 
 	<static_object name="cabinets">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
@@ -152,7 +152,88 @@
 	    </visual>
 	</static_object>
 	
-	<dynamic_object name="plate">
+	<dynamic_object name="plate1">
+		<origin xyz="0 0 -0.21" rpy="0 0 0" />
+		<inertial>
+        	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+        	<mass value="10" />
+        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+      	</inertial>
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/plate/plate.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.086" length="0.01368"/>
+	        </geometry>
+	    </collision>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.59994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.13" length="0.01368"/>
+	        </geometry>
+	    </collision>
+	</dynamic_object>
+
+	<dynamic_object name="plate2">
+		<origin xyz="0 0 -0.21" rpy="0 0 0" />
+		<inertial>
+        	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+        	<mass value="10" />
+        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+      	</inertial>
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/plate/plate.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.086" length="0.01368"/>
+	        </geometry>
+	    </collision>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.59994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.13" length="0.01368"/>
+	        </geometry>
+	    </collision>
+	</dynamic_object>
+
+	<dynamic_object name="plate3">
+		<origin xyz="0 0 -0.21" rpy="0 0 0" />
+		<inertial>
+        	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+        	<mass value="10" />
+        	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
+      	</inertial>
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/plate/plate.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.086" length="0.01368"/>
+	        </geometry>
+	    </collision>
+		<collision>
+	        <origin xyz="0.2664375 -0.32886 0.59994" rpy="0 0 0" />
+			<geometry>
+	            <cylinder radius="0.13" length="0.01368"/>
+	        </geometry>
+	    </collision>
+	</dynamic_object>
+
+	<dynamic_object name="plate4">
 		<origin xyz="0 0 -0.21" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
