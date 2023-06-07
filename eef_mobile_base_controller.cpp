@@ -44,6 +44,7 @@ Vector2d repulsive_torque(Vector2d q, Vector2d q_obs) {
 }
 
 int main() {
+	bool autonomous = false;
 
 	// start redis client
 	auto redis_client = RedisClient();
@@ -73,6 +74,7 @@ int main() {
 	posori_task->_use_interpolation_flag = true;
 	posori_task->_otg->setMaxLinearVelocity(0.8);
 	
+	// Position and orientation task control
 	VectorXd posori_task_torques = VectorXd::Zero(dof);
 	posori_task->_kp_pos = 400;
 	posori_task->_kv_pos = 40;
@@ -80,14 +82,22 @@ int main() {
 	posori_task->_kv_ori = 40;
 
 	// set the current EE posiiton as the desired EE position
+	// Current EE X position
 	Vector3d x = Vector3d::Zero(3);
+
+	// Desired EE X position
 	Vector3d xd = Vector3d::Zero(3);
+
 	// circular trajectory
 	double Amp = 0.1;
 	double w = M_PI;
 	robot->position(x, control_link, control_point);
+
+	// Set the EE position (WHY DO WE DO THIS?)
 	posori_task->_desired_position = x;
-	// array of eef poses
+
+
+	// LIST OF GOAL EE POSES
 	Vector3d eef_pose_array[3];
 	eef_pose_array[0] << 0.3, 0.1, 0.5;
 	eef_pose_array[1] << 0.1, 0.4, 0.6;
@@ -110,6 +120,7 @@ int main() {
 	Vector2d base_velocity;
 	base_xyz << initial_q(0), initial_q(1), 0.0;
 	base_task->_desired_position = base_pose_desired;
+
 	// array of base poses
 	Vector3d base_pose_array[3];
 	base_pose_array[0] << -1.0, -1.0, 0.0;
@@ -188,9 +199,12 @@ int main() {
 	bool repulseOn = true;
 	double switch_time = 0;
 
-	int state = 0;
+	int state = ARM_CONTROLLER;
 	int counter = 0;
-	base_pose_desired = base_pose_array[counter];
+
+	if (autonomous) {
+		base_pose_desired = base_pose_array[counter];
+	}
 
 	for (int i = 0; i < 4*num - 4; i++) {
 		temp = (base_pose_desired.head(2) - obstacles[i]).norm();
@@ -211,41 +225,48 @@ int main() {
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
+
 		base_xyz << robot->_q(0), robot->_q(1), 0.0;
+
 		base_velocity = robot->_dq.head(2);
+
 		robot->position(x, control_link, control_point);
-		xd = eef_pose_array[counter] + base_xyz;
-		robot->updateModel();
 
-		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
-			state = ARM_CONTROLLER;
-			cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
-		} 
+		if (autonomous) {
+			xd = eef_pose_array[counter] + base_xyz;
 
-		if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER) {
-			state = BASE_CONTROLLER;
-			counter++;
-			base_pose_desired = base_pose_array[counter];
-			q_desired = robot->_q.segment(3, 7);
-			cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
-			// reseting values
+			if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
+				state = ARM_CONTROLLER;
+				cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
+			} 
 
-			goalCloseToObstacle = false;
-			distance = 10;
-			repulseOn = true;
-			switch_time = time;
+			if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER) {
+				state = BASE_CONTROLLER;
+				counter++;
+				base_pose_desired = base_pose_array[counter];
+				q_desired = robot->_q.segment(3, 7);
+				cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
+				// reseting values
 
-			for (int i = 0; i < 4*num - 4; i++) {
-				temp = (base_pose_desired.head(2) - obstacles[i]).norm();
-				if (temp < distance) {
-					distance = temp;
+				goalCloseToObstacle = false;
+				distance = 10;
+				repulseOn = true;
+				switch_time = time;
+
+				for (int i = 0; i < 4*num - 4; i++) {
+					temp = (base_pose_desired.head(2) - obstacles[i]).norm();
+					if (temp < distance) {
+						distance = temp;
+					}
+				}
+
+				if (distance < 0.3) {
+					goalCloseToObstacle = true;
 				}
 			}
-
-			if (distance < 0.3) {
-				goalCloseToObstacle = true;
-			}
 		}
+
+		robot->updateModel();
 
 		// set controller inputs
 		posori_task->_desired_position = xd;
@@ -310,7 +331,7 @@ int main() {
 
 		controller_counter++;
 
-		if (counter >= 3) {
+		if (counter >= 3 && autonomous) {
 			cout << "EXIT!";
 			break;
 		}
