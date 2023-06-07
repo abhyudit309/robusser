@@ -75,12 +75,32 @@
 	    </visual>
 	</static_object>
 
-	<static_object name="dishwasher">
+	<static_object name="_dishwasher">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/dishwasher/dishwasher.obj" scale="20 20 20"/>
+	            <mesh filename="../../robusser/components/dishwasher/dishwasher2.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>	
+
+	<static_object name="dishwasher_door">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/dishwasher_door/dishwasher_door.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="dishwasher_rack">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/dishwasher_rack/dishwasher_rack.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
@@ -246,6 +266,16 @@
 	        </geometry>
 	    </visual>
 	</static_object>
+
+	<static_object name="sample_plate">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/sample_plate/sample_plate.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
 	
 	<static_object name="sink">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
@@ -263,6 +293,16 @@
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
 	            <mesh filename="../../robusser/components/small_frame/small_frame.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="sponge">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/sponge/sponge.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
@@ -354,6 +394,16 @@
 			</geometry>
 		</collision>
 	</static_object>
+
+	<static_object name="toaster">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/toaster/toaster.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
 	
 	<static_object name="trash">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
@@ -361,6 +411,16 @@
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
 	            <mesh filename="../../robusser/components/trash/trash.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="tray">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/tray/tray.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
