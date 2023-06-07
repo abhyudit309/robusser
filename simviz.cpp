@@ -512,20 +512,3 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
 	}
 }
 
-cGenericObject* getGenericObjectChildRecursive(const std::string child_name, cGenericObject* parent) {
-	if (parent->getNumChildren() == 0) {
-		return NULL;
-	}
-	for (unsigned int i = 0; i < parent->getNumChildren(); ++i) {
-		auto child = parent->getChild(i);
-		if (child->m_name == child_name) {
-			return child;
-		}
-		auto descendent = getGenericObjectChildRecursive(child_name, child);
-		if (NULL != descendent) {
-			return descendent;
-		}
-	}
-	return NULL;
-}
-
