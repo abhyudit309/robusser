@@ -33,8 +33,9 @@ const string robot_file = "./resources/robusser_robot.urdf";
 const string robot_name = "robusser";
 const string camera_name = "camera_fixed";
 
-const vector<string> object_names = {"plate1", "plate2", "plate3", "plate4"};
-vector<Vector3d> object_pos = {Vector3d(0, 0, -0.21), Vector3d(-1, 0.65, -0.21), Vector3d(-1, 0, -0.21), Vector3d(0, 0.65, -0.21)};
+const vector<string> object_names = {"plate1", "plate2", "glass1", "glass2" };
+vector<Vector3d> object_pos = {Vector3d(0, 0, -0.21), Vector3d(0, 0.65, -0.21),
+							   Vector3d(0.4, 0, -0.21), Vector3d(0.4, 0.3, -0.21)};
 vector<Vector3d> object_lin_vel;
 vector<Quaterniond> object_ori;
 vector<Vector3d> object_ang_vel;
@@ -96,7 +97,7 @@ int main() {
 	auto graphics = new Sai2Graphics::Sai2Graphics(world_file, true);
 	Eigen::Vector3d camera_pos, camera_lookat, camera_vertical;
 	graphics->getCameraPose(camera_name, camera_pos, camera_vertical, camera_lookat);
-	graphics->_world->setBackgroundColor(135.0/255, 206.0/255, 235.0/255);  // set blue background 
+	graphics->_world->setBackgroundColor(207.0/255, 245.0/255, 252.0/255);  // set blue background 
 
 	// load robots
 	auto robot = new Sai2Model::Sai2Model(robot_file, false);
