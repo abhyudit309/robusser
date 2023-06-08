@@ -156,8 +156,8 @@
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
-        	<mass value="5" />
-        	<inertia ixx="2" iyy="2" izz="0.4" ixy="0" ixz="-0" iyz="-0" />
+        	<mass value="0.001" />
+        	<inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="-0" iyz="-0" />
       	</inertial>
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -165,12 +165,22 @@
 	            <mesh filename="../../robusser/components/glass/glass.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
+
+		<collision>
+
+	        <origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
+			<geometry>
+	            <!-- <cylinder radius="0.0317" length="0.12"/> -->
+				<box size="0.0634 0.0634 0.12"/>
+	        </geometry>
+	    </collision>
 		<visual>
 	        <origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
 			<geometry>
 	            <!-- <cylinder radius="0.0317" length="0.12"/> -->
 				<box size="0.0634 0.0634 0.12"/>
 	        </geometry>
+
 	    </visual>
 	</dynamic_object>
 
@@ -178,8 +188,8 @@
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
-        	<mass value="5" />
-        	<inertia ixx="2" iyy="2" izz="0.4" ixy="0" ixz="-0" iyz="-0" />
+        	<mass value="0.001" />
+        	<inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="-0" iyz="-0" />
       	</inertial>
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -188,11 +198,19 @@
 	        </geometry>
 	    </visual>
 		<collision>
-	        <origin xyz="0.0515375 -0.195 0.58994" rpy="0 0 0" />
+	        <origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
 			<geometry>
-	            <cylinder radius="0.0317" length="0.12"/>
+	            <!-- <cylinder radius="0.0317" length="0.12"/> -->
+				<box size="0.0634 0.0634 0.12"/>
 	        </geometry>
 	    </collision>
+		<visual>
+	        <origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
+			<geometry>
+	            <!-- <cylinder radius="0.0317" length="0.12"/> -->
+				<box size="0.0634 0.0634 0.12"/>
+	        </geometry>
+	    </visual>
 	</dynamic_object>
 
 	<static_object name="mat">
@@ -219,7 +237,7 @@
 		<origin xyz="0 0 -0.21" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
-        	<mass value="10" />
+        	<mass value="0.1" />
         	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
       	</inertial>
 	    <visual>
@@ -246,7 +264,7 @@
 		<origin xyz="0 0 -0.21" rpy="0 0 0" />
 		<inertial>
         	<origin xyz="0.2664375 -0.32886 0.58994" rpy="0 0 0" />
-        	<mass value="10" />
+        	<mass value="0.1" />
         	<inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0" />
       	</inertial>
 	    <visual>
