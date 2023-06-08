@@ -21,4 +21,6 @@ const std::string ORI_X_POS_KEY = "sai2::cs225a::project::control::xo";
 const std::string ORI_Y_POS_KEY = "sai2::cs225a::project::control::yo";
 const std::string ORI_Z_POS_KEY = "sai2::cs225a::project::control::zo";
 const std::string GRIPPER_POS_KEY = "sai2::cs225a::project::control::gp";
+const std::string ARM_DONE_KEY = "sai2::cs225a::project::control::done";
+
 
