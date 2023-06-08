@@ -7,6 +7,11 @@
 		<model dir="./resources" path="robusser_robot.urdf" name="robusser" />
 	</robot>
 
+	<robot name="dishwasher">
+		<origin xyz="-3.3 -1.25 -0.53" />
+		<model dir="./resources" path="dishwasher_robot.urdf" name="dishwasher" />
+	</robot>
+
 	<light name="light1" type="directional">
 		<position xyz="1.0 2.0 2.0" />
 		<lookat xyz="0.0 0.0 0.0" />
@@ -85,7 +90,7 @@
 	    </visual>
 	</static_object>	
 
-	<static_object name="dishwasher_door">
+	<!-- <static_object name="dishwasher_door">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -103,7 +108,13 @@
 	            <mesh filename="../../robusser/components/dishwasher_rack/dishwasher_rack.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-	</static_object>
+		<collision>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/dishwasher_rack/dishwasher_rack.obj" scale="20 20 20"/>
+	        </geometry>
+	    </collision>
+	</static_object> -->
 	
 	<static_object name="faucet">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
@@ -154,12 +165,13 @@
 	            <mesh filename="../../robusser/components/glass/glass.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-		<collision>
-	        <origin xyz="0.0515375 -0.195 0.58994" rpy="0 0 0" />
+		<visual>
+	        <origin xyz="0.0515375 -0.195 0.64994" rpy="0 0 0" />
 			<geometry>
-	            <cylinder radius="0.0317" length="0.12"/>
+	            <!-- <cylinder radius="0.0317" length="0.12"/> -->
+				<box size="0.0634 0.0634 0.12"/>
 	        </geometry>
-	    </collision>
+	    </visual>
 	</dynamic_object>
 
 	<dynamic_object name="glass2">
@@ -267,7 +279,7 @@
 	    </visual>
 	</static_object>
 
-	<static_object name="sample_plate">
+	<!-- <static_object name="sample_plate">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
@@ -275,7 +287,7 @@
 	            <mesh filename="../../robusser/components/sample_plate/sample_plate.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
-	</static_object>
+	</static_object> -->
 	
 	<static_object name="sink">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
