@@ -68,8 +68,6 @@ int main() {
 
 	// set the desired posture
 	VectorXd q_desired = initial_q;
-	//q_desired.setZero();
-    //q_desired << -0.5, 1.6;
 	arm_joint_task->_desired_position = q_desired;
 
     redis_client.createReadCallback(0);
