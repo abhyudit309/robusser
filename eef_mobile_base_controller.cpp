@@ -44,7 +44,6 @@ Vector2d repulsive_torque(Vector2d q, Vector2d q_obs) {
 }
 
 int main() {
-	bool autonomous = false;
 
 	// start redis client
 	auto redis_client = RedisClient();
@@ -87,21 +86,25 @@ int main() {
 
 	// Desired EE X position
 	Vector3d xd = Vector3d::Zero(3);
-
+	
 	// circular trajectory
 	double Amp = 0.1;
 	double w = M_PI;
 	robot->position(x, control_link, control_point);
 
-	// Set the EE position (WHY DO WE DO THIS?)
+	// Set the EE position
 	posori_task->_desired_position = x;
 
+	xd = x;
 
-	// LIST OF GOAL EE POSES
+
+	// ee goal poses
 	Vector3d eef_pose_array[3];
 	eef_pose_array[0] << 0.3, 0.1, 0.5;
 	eef_pose_array[1] << 0.1, 0.4, 0.6;
 	eef_pose_array[2] << 0.5, 0.2, 0.4;
+
+	bool ready = false;
 
 
 	// partial joint task to control the mobile base 
@@ -123,9 +126,9 @@ int main() {
 
 	// array of base poses
 	Vector3d base_pose_array[3];
-	base_pose_array[0] << -1.0, -1.0, 0.0;
-	base_pose_array[1] << -4.5, -3.0, 0.0;
-	base_pose_array[2] << -3.0, -1.0, 0.0;
+	base_pose_array[0] << -2.252, -2.542, 0.0;
+	// base_pose_array[1] << -4.5, -3.0, 0.0;
+	// base_pose_array[2] << -3.0, -1.0, 0.0;
 
 	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
@@ -146,14 +149,23 @@ int main() {
 	vector<int> gripper_selection{10, 11};
 	auto gripper_joint_task = new Sai2Primitives::PartialJointTask(robot, gripper_selection);
 	gripper_joint_task->_use_interpolation_flag = false;
+	gripper_joint_task->_use_velocity_saturation_flag = false;
 
 	VectorXd gripper_torques = VectorXd::Zero(dof);
-	gripper_joint_task->_kp = 100;
-	gripper_joint_task->_kv = 20;
+	gripper_joint_task->_kp = 400;
+	gripper_joint_task->_kv = 40;
+
+	// // gripper torque containers
+	VectorXd gripper_command_torques(2);
+	VectorXd q_gripper(2), dq_gripper(2);
+	VectorXd q_gripper_desired(2);
+	// q_gripper_desired.setZero();
+	// double kp_gripper = 400;
+	// double kv_gripper = 40;
 
 	// set the desired posture
 	VectorXd gripper_desired = initial_q.tail(2);
-	// gripper_desired << 0.02, -0.02;
+	gripper_desired << 0.02, -0.02;
 	gripper_joint_task->_desired_position = gripper_desired;
 	
 	// create a timer
@@ -199,12 +211,10 @@ int main() {
 	bool repulseOn = true;
 	double switch_time = 0;
 
-	int state = ARM_CONTROLLER;
+	int state = BASE_CONTROLLER;
 	int counter = 0;
 
-	if (autonomous) {
-		base_pose_desired = base_pose_array[counter];
-	}
+	base_pose_desired = base_pose_array[counter];
 
 	for (int i = 0; i < 4*num - 4; i++) {
 		temp = (base_pose_desired.head(2) - obstacles[i]).norm();
@@ -217,14 +227,50 @@ int main() {
 		goalCloseToObstacle = true;
 	}
 
+	double control_grip_pos = 0;
+	double control_x_pos = 0;
+	double control_y_pos = 0;
+	double control_z_pos = 0;
+	double control_x_ori = 0;
+	double control_y_ori = 0;
+	double control_z_ori = 0;
+
+	redis_client.createReadCallback(0);
+	redis_client.addDoubleToReadCallback(0, GRIPPER_POS_KEY, control_grip_pos);
+	redis_client.addDoubleToReadCallback(0, EE_X_POS_KEY, control_x_pos);
+	redis_client.addDoubleToReadCallback(0, EE_Y_POS_KEY, control_y_pos);
+	redis_client.addDoubleToReadCallback(0, EE_Z_POS_KEY, control_z_pos);
+	redis_client.addDoubleToReadCallback(0, ORI_X_POS_KEY, control_x_ori);
+	redis_client.addDoubleToReadCallback(0, ORI_Y_POS_KEY, control_y_ori);
+	redis_client.addDoubleToReadCallback(0, ORI_Z_POS_KEY, control_z_ori);
+
+	// Orientation control
+	double alpha = -90;
+	double beta = 0;
+	double gamma = 0;
+
+	double gripper_offset = 0;
+
+
 	while (runloop) {
 		// wait for next scheduled loop
 		timer.waitForNextLoop();
 		double time = timer.elapsedTime() - start_time;
 		
+		// execute redis read callback
+		redis_client.executeReadCallback(0);
+
+		// update orientation degree
+		alpha += control_x_ori;
+		beta += control_y_ori;
+		gamma += control_z_ori;
+
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
 		robot->_dq = redis_client.getEigenMatrixJSON(JOINT_VELOCITIES_KEY);
+
+
+		gripper_offset += (control_grip_pos / 1000);
 
 		base_xyz << robot->_q(0), robot->_q(1), 0.0;
 
@@ -232,51 +278,52 @@ int main() {
 
 		robot->position(x, control_link, control_point);
 
-		if (autonomous) {
-			xd = eef_pose_array[counter] + base_xyz;
+		
 
-			if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
-				state = ARM_CONTROLLER;
-				cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
-			} 
+		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
+			state = ARM_CONTROLLER;
+			cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
+		} 
 
-			if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER) {
-				state = BASE_CONTROLLER;
-				counter++;
-				base_pose_desired = base_pose_array[counter];
-				q_desired = robot->_q.segment(3, 7);
-				cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
-				// reseting values
+		if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER && ready) {
+			state = BASE_CONTROLLER;
+			counter++;
+			base_pose_desired = base_pose_array[counter];
+			q_desired = robot->_q.segment(3, 7);
+			cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
+			// reseting values
 
-				goalCloseToObstacle = false;
-				distance = 10;
-				repulseOn = true;
-				switch_time = time;
+			goalCloseToObstacle = false;
+			distance = 10;
+			repulseOn = true;
+			switch_time = time;
 
-				for (int i = 0; i < 4*num - 4; i++) {
-					temp = (base_pose_desired.head(2) - obstacles[i]).norm();
-					if (temp < distance) {
-						distance = temp;
-					}
-				}
-
-				if (distance < 0.3) {
-					goalCloseToObstacle = true;
+			for (int i = 0; i < 4*num - 4; i++) {
+				temp = (base_pose_desired.head(2) - obstacles[i]).norm();
+				if (temp < distance) {
+					distance = temp;
 				}
 			}
-		}
+
+			if (distance < 0.3) {
+				goalCloseToObstacle = true;
+			}
+			}
 
 		robot->updateModel();
 
-		// set controller inputs
-		posori_task->_desired_position = xd;
-		base_task->_desired_position = base_pose_desired;
-		arm_joint_task->_desired_position = q_desired;
-		gripper_joint_task->_desired_position = gripper_desired;
+		//set controller inputs
+		
 
 		if (state == BASE_CONTROLLER) {
+			posori_task->_desired_position = xd;
+			arm_joint_task->_desired_position = q_desired;
+			base_task->_desired_position = base_pose_desired;
+			gripper_joint_task->_desired_position = gripper_desired;
 			// put base control code here
 			//std::cout << "BASE" << std::endl;
+			xd = eef_pose_array[counter] + base_xyz;
+
 			N_prec.setIdentity();
 			base_task->updateTaskModel(N_prec);
 			N_prec = base_task->_N;		
@@ -310,13 +357,26 @@ int main() {
 		else if (state == ARM_CONTROLLER) {
 			// put arm control code here
 			//std::cout << "ARM" << std::endl;
+			posori_task->_desired_position += Vector3d(control_x_pos/10000, control_y_pos/10000, control_z_pos/10000);
+
+			arm_joint_task->_desired_position = q_desired;
+			
+			base_task->_desired_position = base_pose_desired;
+
+			posori_task->_desired_orientation = AngleAxisd(alpha * (M_PI / 180), Vector3d::UnitX()).toRotationMatrix() * AngleAxisd(beta * (M_PI / 180), Vector3d::UnitY()).toRotationMatrix() * AngleAxisd(gamma * (M_PI / 180),Vector3d::UnitZ()).toRotationMatrix();
+			
+			q_gripper_desired << gripper_desired[0] + (-1 * gripper_offset), (gripper_desired[1] + gripper_offset);
+
+			gripper_joint_task->_desired_position = q_gripper_desired;
+
 			N_prec.setIdentity();
+			gripper_joint_task->updateTaskModel(N_prec);
+			N_prec = gripper_joint_task->_N;	
 			posori_task->updateTaskModel(N_prec);
 			N_prec = posori_task->_N;	
 			base_task->updateTaskModel(N_prec);
 			N_prec = base_task->_N;	
 			arm_joint_task->updateTaskModel(N_prec);
-			gripper_joint_task->updateTaskModel(N_prec);
 
 			// compute torques
 			posori_task->computeTorques(posori_task_torques);
@@ -324,17 +384,27 @@ int main() {
 			arm_joint_task->computeTorques(arm_joint_task_torques);
 			gripper_joint_task->computeTorques(gripper_torques);
 
-			command_torques = posori_task_torques + base_task_torques + arm_joint_task_torques + gripper_torques;
+			
+
+			// Removed base torques
+			//cout << "1============================" << endl;
+			//cout << posori_task_torques << endl;
+			// cout << "2============================" << endl;
+			// cout << base_task_torques << endl;
+			// cout << "3============================" << endl;
+			// cout << arm_joint_task_torques << endl;
+			// cout << "4============================" << endl;
+			command_torques = base_task_torques + posori_task_torques + arm_joint_task_torques + gripper_torques;
 		}
 
 		redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
 
 		controller_counter++;
 
-		if (counter >= 3 && autonomous) {
-			cout << "EXIT!";
-			break;
-		}
+		// if (counter >= 3) {
+		// 	cout << "EXIT!";
+		// 	break;
+		// }
 	}
 
 	double end_time = timer.elapsedTime();
