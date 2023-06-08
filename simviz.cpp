@@ -91,7 +91,31 @@ bool transYn = false;
 double x_vel = 0;
 double y_vel = 0;
 
+bool transXpEE = false;
+bool transXnEE = false;
+bool transYpEE = false;
+bool transYnEE = false;
+bool transZpEE = false;
+bool transZnEE = false;
+bool transGpEE = false;
+bool transGnEE = false;
+bool transXpEEOri = false;
+bool transXnEEOri = false;
+bool transYpEEOri = false;
+bool transYnEEOri = false;
+bool transZpEEOri = false;
+bool transZnEEOri = false;
+double control_grip_pos = 0;
+double control_x_pos = 0;
+double control_y_pos = 0;
+double control_z_pos = 0;
+double control_x_ori = 0;
+double control_y_ori = 0;
+double control_z_ori = 0;
+
 int main() {
+
+
 	cout << "Loading URDF world model file: " << world_file << endl;
 
 	// start redis client
@@ -118,8 +142,7 @@ int main() {
 	// load simulation world
 	auto sim = new Simulation::Sai2Simulation(world_file, false);
 	sim->setCollisionRestitution(0);
-	// sim->setCoeffFrictionStatic(0.6);
-	sim->setCoeffFrictionStatic(0);
+	sim->setCoeffFrictionStatic(0.6);
 
 	// read joint positions, velocities, update model
 	sim->getJointPositions(robot_name, robot->_q);
@@ -285,6 +308,69 @@ int main() {
 		if (!transYp && !transYn) {
 			y_vel = 0;
 		}
+		if (transXpEE) {
+			control_x_pos = 1;
+		}
+		if (transXnEE) {
+			control_x_pos = -1;
+		}
+		if (!transXpEE && !transXnEE) {
+			control_x_pos = 0;
+		}
+		if (transYpEE) {
+			control_y_pos = 1;
+		}
+		if (transYnEE) {
+			control_y_pos = -1;
+		}
+		if (!transYpEE && !transYnEE) {
+			control_y_pos = 0;
+		}
+		if (transZpEE) {
+			control_z_pos = 1;
+		}
+		if (transZnEE) {
+			control_z_pos = -1;
+		}
+		if (!transZpEE && !transZnEE) {
+			control_z_pos = 0;
+		}
+		if (transXpEEOri) {
+			control_x_ori = 0.01;
+		}
+		if (transXnEEOri) {
+			control_x_ori = -0.01;
+		}
+		if (!transXpEEOri && !transXnEEOri) {
+			control_x_ori = 0;
+		}
+		if (transYpEEOri) {
+			control_y_ori = 0.01;
+		}
+		if (transYnEEOri) {
+			control_y_ori = -0.01;
+		}
+		if (!transYpEEOri && !transYnEEOri) {
+			control_y_ori = 0;
+		}
+		if (transZpEEOri) {
+			control_z_ori = 0.01;
+		}
+		if (transZnEEOri) {
+			control_z_ori = -0.01;
+		}
+		if (!transZpEEOri && !transZnEEOri) {
+			control_z_ori = 0;
+		}
+		if (transGpEE) {
+			control_grip_pos = 0.05;
+		}
+		if (transGnEE) {
+			control_grip_pos = -0.05;
+		}
+		if (!transGpEE && !transGnEE) {
+			control_grip_pos = 0;
+		}
 		graphics->setCameraPose(camera_name, camera_pos, cam_up_axis, camera_lookat);
 		glfwGetCursorPos(window, &last_cursorx, &last_cursory);
 
@@ -341,6 +427,13 @@ void simulation(Sai2Model::Sai2Model* robot, Sai2Model::Sai2Model* dishwasher, S
 	redis_client.createWriteCallback(0);
 	redis_client.addDoubleToWriteCallback(0, X_VEL_KEY, x_vel);
 	redis_client.addDoubleToWriteCallback(0, Y_VEL_KEY, y_vel);
+	redis_client.addDoubleToWriteCallback(0, EE_X_POS_KEY, control_x_pos);
+	redis_client.addDoubleToWriteCallback(0, EE_Y_POS_KEY, control_y_pos);
+	redis_client.addDoubleToWriteCallback(0, EE_Z_POS_KEY, control_z_pos);
+	redis_client.addDoubleToWriteCallback(0, ORI_X_POS_KEY, control_x_ori);
+	redis_client.addDoubleToWriteCallback(0, ORI_Y_POS_KEY, control_y_ori);
+	redis_client.addDoubleToWriteCallback(0, ORI_Z_POS_KEY, control_z_ori);
+	redis_client.addDoubleToWriteCallback(0, GRIPPER_POS_KEY, control_grip_pos);
 
 	// create a timer
 	LoopTimer timer;
@@ -506,17 +599,47 @@ void keySelect(GLFWwindow* window, int key, int scancode, int action, int mods)
 		case GLFW_KEY_Z:
 			fTransZn = set;
 			break;
-		case GLFW_KEY_I:
-			transYn = set;
+		case GLFW_KEY_R:
+			transXpEE = set;
 			break;
-		case GLFW_KEY_K:
-			transYp = set;
+		case GLFW_KEY_T:
+			transXnEE = set;
+			break;
+		case GLFW_KEY_F:
+			transYpEE = set;
+			break;
+		case GLFW_KEY_G:
+			transYnEE = set;
+			break;
+		case GLFW_KEY_V:
+			transZpEE = set;
+			break;
+		case GLFW_KEY_B:
+			transZnEE = set;
+			break;
+		case GLFW_KEY_Y:
+			transXpEEOri = set;
+			break;
+		case GLFW_KEY_U:
+			transXnEEOri = set;
+			break;
+		case GLFW_KEY_H:
+			transYpEEOri = set;
 			break;
 		case GLFW_KEY_J:
-			transXp = set;
+			transYnEEOri = set;
 			break;
-		case GLFW_KEY_L:
-			transXn = set;
+		case GLFW_KEY_N:
+			transZpEEOri = set;
+			break;
+		case GLFW_KEY_M:
+			transZnEEOri = set;
+			break;
+		case GLFW_KEY_X:
+			transGpEE = set;
+			break;
+		case GLFW_KEY_C:
+			transGnEE = set;
 			break;
 		default:
 			break;
