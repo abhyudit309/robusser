@@ -25,18 +25,23 @@
 #include <signal.h>
 bool fSimulationRunning = false;
 void sighandler(int){fSimulationRunning = false;}
+bool fSimulationLoopDone = false;
+bool fControllerLoopDone = true; // initialize as true for first loop
 
 using namespace std;
 using namespace Eigen;
 
 const string world_file = "./resources/world_robusser.urdf";
 const string robot_file = "./resources/robusser_robot.urdf";
+const string dishwasher_file = "./resources/dishwasher_robot.urdf";
 const string robot_name = "robusser";
+const string dishwasher_name = "dishwasher";
 const string camera_name = "camera_fixed";
 
 const vector<string> object_names = {"plate1", "plate2", "glass1", "glass2" };
 vector<Vector3d> object_pos = {Vector3d(0, 0, -0.21), Vector3d(0, 0.65, -0.21),
 							   Vector3d(0.4, 0, -0.21), Vector3d(0.4, 0.3, -0.21)};
+
 vector<Vector3d> object_lin_vel;
 vector<Quaterniond> object_ori;
 vector<Vector3d> object_ang_vel;
@@ -48,7 +53,14 @@ const int n_objects = object_names.size();
 RedisClient redis_client;
 
 // simulation function prototype
-void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UIForceWidget *ui_force_widget);
+//void simulation(Sai2Model::Sai2Model* robot, Sai2Model::Sai2Model* dishwasher, Simulation::Sai2Simulation* sim, UIForceWidget *ui_force_widget);
+void simulation(Sai2Model::Sai2Model* robot, Sai2Model::Sai2Model* dishwasher, Simulation::Sai2Simulation* sim, UIForceWidget *ui_force_widget);
+
+// function for converting string to bool
+bool string_to_bool(const std::string& x);
+
+// function for converting bool to string
+inline const char * const bool_to_string(bool b);
 
 // callback to print glfw errors
 void glfwError(int error, const char* description);
@@ -79,6 +91,7 @@ bool transYn = false;
 
 double x_vel = 0;
 double y_vel = 0;
+
 
 bool transXpEE = false;
 bool transXnEE = false;
@@ -127,46 +140,27 @@ int main() {
 	// load robots
 	auto robot = new Sai2Model::Sai2Model(robot_file, false);
 	robot->updateKinematics();
+	auto dishwasher = new Sai2Model::Sai2Model(dishwasher_file, false);
+	dishwasher->updateKinematics();
 
 	// load simulation world
 	auto sim = new Simulation::Sai2Simulation(world_file, false);
 	sim->setCollisionRestitution(0);
+
 	sim->setCoeffFrictionStatic(1);
 	//sim->setCoeffFrictionStatic("platee2", 0.6);
+
 
 	// read joint positions, velocities, update model
 	sim->getJointPositions(robot_name, robot->_q);
 	sim->getJointVelocities(robot_name, robot->_dq);
 	robot->updateKinematics();
 
-	// cGenericObject* object = new cGenericObject();
-
-	// for (unsigned int i = 0; i < graphics->_world->getNumChildren(); ++i) {
-	// 	auto object_ptr = graphics->_world->getChild(i);
-	// 	if (object_ptr->m_name == "plate") {
-	// 		// initialize a cGenericObject to represent this object in the world
-	// 		object->m_name = "plate2";
-	// 		// set object position and rotation
-	// 		object->setLocalPos(Vector3d(0, 0, -0.21));
-	// 		object->setLocalRot(object_ptr->getLocalRot());
-	// 		graphics->_world->addChild(object);
-
-	// 		// load object graphics, must have atleast one
-	// 		for (const auto visual_ptr: object_ptr->m_displayList) {
-	// 			Parser::loadVisualtoGenericObject(object, visual_ptr);
-	// 		}
-	// 	}
-	// }
-	
-	// cout << object->m_name << endl;
-	// test->m_name = "plate2";
-	// graphics->_world->addChild(test);
-
-	// graphics->_world->addChild(getGenericObjectChildRecursive("plate", graphics->_world)->copy());
-	// sim->_world->addChild(getGenericObjectChildRecursive("plate", sim->_world)->copy());
+	sim->getJointPositions(dishwasher_name, dishwasher->_q);
+	sim->getJointVelocities(dishwasher_name, dishwasher->_dq);
+	dishwasher->updateKinematics();
 
 	for (int i = 0; i < n_objects; ++i) {
-		cout << i << endl;
 		Vector3d _object_pos, _object_lin_vel, _object_ang_vel;
 		Quaterniond _object_ori;
 		sim->getObjectPosition(object_names[i], _object_pos, _object_ori);
@@ -222,16 +216,18 @@ int main() {
 	glewInitialize();
 
 	fSimulationRunning = true;
-	thread sim_thread(simulation, robot, sim, ui_force_widget);
 	auto camera = graphics->getCamera(camera_name);
 	//camera->setStereomode();
+	thread sim_thread(simulation, robot, dishwasher, sim, ui_force_widget);
+	
 	// while window is open:
 	while (!glfwWindowShouldClose(window) && fSimulationRunning)
 	{
 		// update graphics. this automatically waits for the correct amount of time
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
-		graphics->updateGraphics(robot_name, robot);
+		// graphics->updateGraphics(robot_name, robot);
+		graphics->updateGraphics(dishwasher_name, dishwasher);
 		for (int i = 0; i < n_objects; ++i) {
 			graphics->updateObjectGraphics(object_names[i], object_pos[i], object_ori[i]);
 		}
@@ -431,11 +427,13 @@ int main() {
 }
 
 //------------------------------------------------------------------------------
-void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UIForceWidget *ui_force_widget) {
+void simulation(Sai2Model::Sai2Model* robot, Sai2Model::Sai2Model* dishwasher, Simulation::Sai2Simulation* sim, UIForceWidget *ui_force_widget) {
 
 	int dof = robot->dof();
 	VectorXd command_torques = VectorXd::Zero(dof);
+	VectorXd dishwasher_command_torques = VectorXd::Zero(dishwasher->dof());
 	redis_client.setEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY, command_torques);
+	redis_client.setEigenMatrixJSON(DISHWASHER_JOINT_TORQUES_COMMANDED_KEY, dishwasher_command_torques);
 
 	redis_client.createWriteCallback(0);
 	redis_client.addDoubleToWriteCallback(0, X_VEL_KEY, x_vel);
@@ -457,6 +455,7 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 
 	// init variables
 	VectorXd g(dof);
+	VectorXd dishwasher_g(dishwasher->dof());
 
 	Eigen::Vector3d ui_force;
 	ui_force.setZero();
@@ -465,45 +464,77 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 	ui_force_command_torques.setZero();
 
 	while (fSimulationRunning) {
-		fTimerDidSleep = timer.waitForNextLoop();
+		// fTimerDidSleep = timer.waitForNextLoop();
 
-		// get gravity torques
-		robot->gravityVector(g);
+		if(fControllerLoopDone || fRobotLinkSelect) {
+			// get gravity torques
+			robot->gravityVector(g);
+			dishwasher->gravityVector(dishwasher_g);
 
-		// read arm torques from redis and apply to simulated robot
-		command_torques = redis_client.getEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY);
-		
-		ui_force_widget->getUIForce(ui_force);
-		ui_force_widget->getUIJointTorques(ui_force_command_torques);
+			// read arm torques from redis and apply to simulated robot
+			if(fControllerLoopDone) {
+				command_torques = redis_client.getEigenMatrixJSON(JOINT_TORQUES_COMMANDED_KEY);
+				dishwasher_command_torques = redis_client.getEigenMatrixJSON(DISHWASHER_JOINT_TORQUES_COMMANDED_KEY);
+			}
+			else {
+				command_torques.setZero();
+				dishwasher_command_torques.setZero();
+			}
 
-		if (fRobotLinkSelect)
-			sim->setJointTorques(robot_name, command_torques + ui_force_command_torques + g);
-		else
-			sim->setJointTorques(robot_name, command_torques + g);
+			ui_force_widget->getUIForce(ui_force);
+			ui_force_widget->getUIJointTorques(ui_force_command_torques);
 
-		// integrate forward
-		double curr_time = timer.elapsedTime();
-		double loop_dt = curr_time - last_time; 
-		sim->integrate(loop_dt);
+			// if (fRobotLinkSelect)
+			// 	sim->setJointTorques(robot_name, command_torques + ui_force_command_torques + g);
+			// else
+			// 	sim->setJointTorques(robot_name, command_torques + g);
+			sim->setJointTorques(dishwasher_name, dishwasher_command_torques + dishwasher_g);
+			// integrate forward
+			double curr_time = timer.elapsedTime();
+			double loop_dt = curr_time - last_time; 
+			// sim->integrate(loop_dt);
+			sim->integrate(0.001);
 
-		// read joint positions, velocities, update model
-		sim->getJointPositions(robot_name, robot->_q);
-		sim->getJointVelocities(robot_name, robot->_dq);
-		robot->updateModel();
+			// read joint positions, velocities, update model
+			// sim->getJointPositions(robot_name, robot->_q);
+			// sim->getJointVelocities(robot_name, robot->_dq);
+			// robot->updateModel();
 
-		// write new robot state to redis
-		redis_client.setEigenMatrixJSON(JOINT_ANGLES_KEY, robot->_q);
-		redis_client.setEigenMatrixJSON(JOINT_VELOCITIES_KEY, robot->_dq);
+			sim->getJointPositions(dishwasher_name, dishwasher->_q);
+			sim->getJointVelocities(dishwasher_name, dishwasher->_dq);
+			dishwasher->updateModel();
+			cout << "Position: " << dishwasher->_q << endl;
+			cout << "Velocity: " << dishwasher->_dq << endl;
 
-		for (int i = 0; i < n_objects; ++i) {
-			sim->getObjectPosition(object_names[i], object_pos[i], object_ori[i]);
-			sim->getObjectVelocity(object_names[i], object_lin_vel[i], object_ang_vel[i]);
+			// write new robot state to redis
+			redis_client.setEigenMatrixJSON(JOINT_ANGLES_KEY, robot->_q);
+			redis_client.setEigenMatrixJSON(JOINT_VELOCITIES_KEY, robot->_dq);
+
+			redis_client.setEigenMatrixJSON(DISHWASHER_JOINT_ANGLES_KEY, dishwasher->_q);
+			redis_client.setEigenMatrixJSON(DISHWASHER_JOINT_VELOCITIES_KEY, dishwasher->_dq);
+
+			for (int i = 0; i < n_objects; ++i) {
+				sim->getObjectPosition(object_names[i], object_pos[i], object_ori[i]);
+				sim->getObjectVelocity(object_names[i], object_lin_vel[i], object_ang_vel[i]);
+			}
+
+			// simulation loop is done
+            fSimulationLoopDone = true;
+
+            // ask for next control loop
+            fControllerLoopDone = false;
+
+			redis_client.set(SIMULATION_LOOP_DONE_KEY, bool_to_string(fSimulationLoopDone));
+            redis_client.set(CONTROLLER_LOOP_DONE_KEY, bool_to_string(fControllerLoopDone)); // ask for next control loop
+
+			redis_client.executeWriteCallback(0);
+
+			//update last time
+			last_time = curr_time;
 		}
 
-		redis_client.executeWriteCallback(0);
-
-		//update last time
-		last_time = curr_time;
+        // read controller state
+        fControllerLoopDone = string_to_bool(redis_client.get(CONTROLLER_LOOP_DONE_KEY));
 	}
 
 	double end_time = timer.elapsedTime();
@@ -511,6 +542,20 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 	std::cout << "Simulation Loop run time  : " << end_time << " seconds\n";
 	std::cout << "Simulation Loop updates   : " << timer.elapsedCycles() << "\n";
 	std::cout << "Simulation Loop frequency : " << timer.elapsedCycles()/end_time << "Hz\n";
+}
+
+//------------------------------------------------------------------------------
+
+bool string_to_bool(const std::string& x) {
+    assert(x == "false" || x == "true");
+    return x == "true";
+}
+
+//------------------------------------------------------------------------------
+
+inline const char * const bool_to_string(bool b)
+{
+    return b ? "true" : "false";
 }
 
 //------------------------------------------------------------------------------
@@ -640,4 +685,3 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
 			break;
 	}
 }
-

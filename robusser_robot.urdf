@@ -63,7 +63,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link1.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link1.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -80,7 +80,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link2.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link2.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -97,7 +97,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link3.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link3.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -114,7 +114,7 @@
     </visual>
       <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link4.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link4.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -131,7 +131,7 @@
     </visual>
       <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link5.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link5.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -148,7 +148,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link6.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link6.obj"/> -->
       </geometry>
     </collision>
   </link>
@@ -165,7 +165,7 @@
     </visual>
     <collision>
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/link7.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/link7.obj"/> -->
       </geometry>
     </collision>
     <visual>
@@ -177,7 +177,7 @@
     <!-- <collision>
       <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/hand.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/hand.obj"/> -->
       </geometry>
     </collision> -->
   </link>
