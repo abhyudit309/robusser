@@ -112,7 +112,7 @@ int main() {
 	base_task->_desired_position = base_pose_desired;
 	// array of base poses
 	Vector3d base_pose_array[3];
-	base_pose_array[0] << -1.0, -1.0, 0.0;
+	base_pose_array[0] << -2.252, -2.542, 0.0;
 	base_pose_array[1] << -4.5, -3.0, 0.0;
 	base_pose_array[2] << -3.0, -1.0, 0.0;
 
@@ -153,10 +153,10 @@ int main() {
 	bool fTimerDidSleep = true;
 
 	Vector2d q_obs;
-	Vector2d vertex1 = Vector2d(-3.77, -2.6);
-	Vector2d vertex2 = Vector2d(-3.77, -0.9);
-	Vector2d vertex3 = Vector2d(-1.55, -0.9);
-	Vector2d vertex4 = Vector2d(-1.55, -2.6);
+	Vector2d vertex1 = Vector2d(-3.75, -2.5);
+	Vector2d vertex2 = Vector2d(-3.75, -1.0);
+	Vector2d vertex3 = Vector2d(-1.57, -1.0);
+	Vector2d vertex4 = Vector2d(-1.57, -2.5);
 
 	const int num = 10;
 	VectorXd obs_x = VectorXd::LinSpaced(num, vertex2[0], vertex3[0]);
@@ -264,6 +264,7 @@ int main() {
 
 			// obstacle avoidance
 			VectorXd base_task_torques_obs = VectorXd::Zero(dof);
+			cout << "Repulse ON: " << repulseOn << endl;
 
 			if (repulseOn){
 				for (int i = 0; i < 4*num - 4; i++) {
