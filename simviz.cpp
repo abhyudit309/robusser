@@ -69,6 +69,9 @@ bool transYn = false;
 double x_vel = 0;
 double y_vel = 0;
 
+bool button_pressed = false;
+double arm_done = 0;
+
 int main() {
 	cout << "Loading URDF world model file: " << world_file << endl;
 
@@ -238,6 +241,12 @@ int main() {
 		if (!transYp && !transYn) {
 			y_vel = 0;
 		}
+		if (!button_pressed) {
+			arm_done = 0;
+		}
+		if (button_pressed) {
+			arm_done = 1;
+		}
 		graphics->setCameraPose(camera_name, camera_pos, cam_up_axis, camera_lookat);
 		glfwGetCursorPos(window, &last_cursorx, &last_cursory);
 
@@ -292,6 +301,7 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 	redis_client.createWriteCallback(0);
 	redis_client.addDoubleToWriteCallback(0, X_VEL_KEY, x_vel);
 	redis_client.addDoubleToWriteCallback(0, Y_VEL_KEY, y_vel);
+	redis_client.addDoubleToWriteCallback(0, ARM_DONE_KEY, arm_done);
 
 	// create a timer
 	LoopTimer timer;
@@ -416,6 +426,9 @@ void keySelect(GLFWwindow* window, int key, int scancode, int action, int mods)
 			break;
 		case GLFW_KEY_L:
 			transXn = set;
+			break;
+		case GLFW_KEY_ENTER:
+			button_pressed = set;
 			break;
 		default:
 			break;

@@ -15,4 +15,7 @@ const std::string JOINT_TORQUES_COMMANDED_KEY = "sai2::cs225a::project::actuator
 const std::string X_VEL_KEY = "sai2::cs225a::project::control::xv";
 const std::string Y_VEL_KEY = "sai2::cs225a::project::control::yv";
 
+// add key for arm status
+const std::string ARM_DONE_KEY = "sai2::cs225a::project::control::done";
+
 

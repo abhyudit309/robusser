@@ -78,10 +78,12 @@ int main() {
 	posori_task->_kv_pos = 40;
 	posori_task->_kp_ori = 400;
 	posori_task->_kv_ori = 40;
+	posori_task->_use_velocity_saturation_flag = true;  // adjust based on speed
 
 	// set the current EE posiiton as the desired EE position
 	Vector3d x = Vector3d::Zero(3);
 	Vector3d xd = Vector3d::Zero(3);
+	Vector3d xdes = Vector3d::Zero(3);
 	// circular trajectory
 	double Amp = 0.1;
 	double w = M_PI;
@@ -92,7 +94,6 @@ int main() {
 	eef_pose_array[0] << 0.3, 0.1, 0.5;
 	eef_pose_array[1] << 0.1, 0.4, 0.6;
 	eef_pose_array[2] << 0.5, 0.2, 0.4;
-
 
 	// partial joint task to control the mobile base 
 	vector<int> base_joint_selection{0, 1, 2};
@@ -113,8 +114,8 @@ int main() {
 	// array of base poses
 	Vector3d base_pose_array[3];
 	base_pose_array[0] << -2.252, -2.542, 0.0;
-	base_pose_array[1] << -4.5, -3.0, 0.0;
-	base_pose_array[2] << -3.0, -1.0, 0.0;
+	base_pose_array[1] << -4.88, -1.576, 3.14;
+	base_pose_array[2] << -4.88, -2.22, 4.712;
 
 	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
@@ -142,8 +143,14 @@ int main() {
 
 	// set the desired posture
 	VectorXd gripper_desired = initial_q.tail(2);
-	// gripper_desired << 0.02, -0.02;
+	gripper_desired << 0.0, 0.0;
 	gripper_joint_task->_desired_position = gripper_desired;
+
+	double arm_done = 0;
+
+	// redis keys
+	redis_client.createReadCallback(0);
+	redis_client.addDoubleToReadCallback(0, ARM_DONE_KEY, arm_done);
 	
 	// create a timer
 	LoopTimer timer;
@@ -189,6 +196,8 @@ int main() {
 	double switch_time = 0;
 
 	int state = 0;
+	cout << "Going to dish" << endl;
+	int control_mode = 0;
 	int counter = 0;
 	base_pose_desired = base_pose_array[counter];
 
@@ -207,6 +216,7 @@ int main() {
 		// wait for next scheduled loop
 		timer.waitForNextLoop();
 		double time = timer.elapsedTime() - start_time;
+		redis_client.executeReadCallback(0);
 		
 		// read robot state from redis
 		robot->_q = redis_client.getEigenMatrixJSON(JOINT_ANGLES_KEY);
@@ -214,16 +224,38 @@ int main() {
 		base_xyz << robot->_q(0), robot->_q(1), 0.0;
 		base_velocity = robot->_dq.head(2);
 		robot->position(x, control_link, control_point);
-		xd = eef_pose_array[counter] + base_xyz;
+		if (state == 0) {
+			xd = eef_pose_array[counter] + base_xyz;
+		}
+		// FSM logic
+		else if (state == 1) {
+			xd = Vector3d(-0.7, 0.0, 0.4) + base_xyz;
+		}
+		else if (state == 2) {
+			xd = Vector3d(-0.7, 0.0, 0.3) + base_xyz;
+		}
+		else {}
 		robot->updateModel();
 
-		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
-			state = ARM_CONTROLLER;
+		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && control_mode == BASE_CONTROLLER) {
+			control_mode = ARM_CONTROLLER;
 			cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
-		} 
+			// FSM logic
+			// if (state == 1) {
+			// 	xdes = Vector3d(0.1, 0.4, 0.6) + base_xyz;
+			// }
+			// if (state == 2) {
+			// 	xdes = Vector3d(0.5, 0.2, 0.4) + base_xyz;
+			// 	gripper_desired << 0.02, -0.02;
+			// }
+		}
 
-		if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER) {
-			state = BASE_CONTROLLER;
+		if ((x - xd).norm() < 0.001 && control_mode == ARM_CONTROLLER && arm_done == 1) {
+			if (state == 2) {
+				gripper_desired << 0.02, -0.02;
+			}
+			state++;
+			control_mode = BASE_CONTROLLER;
 			counter++;
 			base_pose_desired = base_pose_array[counter];
 			q_desired = robot->_q.segment(3, 7);
@@ -253,7 +285,7 @@ int main() {
 		arm_joint_task->_desired_position = q_desired;
 		gripper_joint_task->_desired_position = gripper_desired;
 
-		if (state == BASE_CONTROLLER) {
+		if (control_mode == BASE_CONTROLLER) {
 			// put base control code here
 			//std::cout << "BASE" << std::endl;
 			N_prec.setIdentity();
@@ -264,7 +296,7 @@ int main() {
 
 			// obstacle avoidance
 			VectorXd base_task_torques_obs = VectorXd::Zero(dof);
-			cout << "Repulse ON: " << repulseOn << endl;
+			//cout << "Repulse ON: " << repulseOn << endl;
 
 			if (repulseOn){
 				for (int i = 0; i < 4*num - 4; i++) {
@@ -287,7 +319,7 @@ int main() {
 
 		}
 
-		else if (state == ARM_CONTROLLER) {
+		else if (control_mode == ARM_CONTROLLER) {
 			// put arm control code here
 			//std::cout << "ARM" << std::endl;
 			N_prec.setIdentity();
@@ -311,10 +343,10 @@ int main() {
 
 		controller_counter++;
 
-		if (counter >= 3) {
-			cout << "EXIT!";
-			break;
-		}
+		// if (counter >= 3) {
+		// 	cout << "EXIT!";
+		// 	break;
+		// }
 	}
 
 	double end_time = timer.elapsedTime();
