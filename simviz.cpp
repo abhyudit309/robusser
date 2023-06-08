@@ -71,6 +71,8 @@ bool fTransZp = false;
 bool fTransZn = false;
 bool fRotPanTilt = false;
 bool fRobotLinkSelect = false;
+bool switch_camera = false;
+
 
 bool transXp = false;
 bool transXn = false;
@@ -102,6 +104,11 @@ double control_x_ori = 0;
 double control_y_ori = 0;
 double control_z_ori = 0;
 
+// camera modes 
+int CAMERA_MODE = 0;  // 0 for perspective, 1 for end-effector 
+Eigen::Vector3d starting_camera_pos;
+Eigen::Vector3d starting_camera_lookat;
+double base_theta = 0;
 //cGenericObject* getGenericObjectChildRecursive(const std::string child_name, cGenericObject* parent);
 
 int main() {
@@ -132,6 +139,7 @@ int main() {
 	auto sim = new Simulation::Sai2Simulation(world_file, false);
 	sim->setCollisionRestitution(0);
 	sim->setCoeffFrictionStatic(1);
+	sim->setCoeffFrictionDynamic(1);
 	//sim->setCoeffFrictionStatic("platee2", 0.6);
 
 	// read joint positions, velocities, update model
@@ -237,6 +245,8 @@ int main() {
 		}
 		//graphics->render(camera_name, width, height);
 		camera->renderView(width, height);
+		//camera->setClippingPlanes(0,100000);
+
 		
 
 		// swap buffers
@@ -252,6 +262,29 @@ int main() {
 
 		// poll for events
 		glfwPollEvents();
+
+		// poll for switching camera perpective to end-effector 
+		if (switch_camera == true) {
+			CAMERA_MODE = 1 - CAMERA_MODE;  
+			if (CAMERA_MODE == 0) {  
+				camera_pos = starting_camera_pos;
+				camera_lookat = starting_camera_lookat;
+			} else if (CAMERA_MODE == 1) {
+				starting_camera_pos = camera_pos;
+				starting_camera_lookat = camera_lookat;
+			}
+			switch_camera = false;
+		}
+
+		if (CAMERA_MODE == 1) {
+			robot->positionInWorld(camera_pos, "link7", Vector3d(0.3, 0, -0.2));
+			base_theta = robot->_q(3);
+			camera_lookat = camera_pos - Eigen::Vector3d(0.1 * cos(base_theta), 0.1 * sin(base_theta), 0);  
+		}
+
+
+
+
 
 		// move scene camera as required
 		// graphics->getCameraPose(camera_name, camera_pos, camera_vertical, camera_lookat);

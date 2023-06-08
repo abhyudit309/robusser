@@ -174,12 +174,12 @@
         <mesh filename="../../../model/panda/meshes/visual/hand.obj"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0.107" rpy="0 0 -0.78539816339" />
       <geometry>
         <mesh filename="../../../model/panda/meshes/collision/hand.obj"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   <link name="leftfinger">
     <inertial>
@@ -192,10 +192,18 @@
         <mesh filename="../../../model/panda/meshes/visual/finger.obj"/>
       </geometry>
     </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
+      <geometry>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/finger.obj"/> -->
+        <box size=".01 .01 .11" />
+      </geometry>
+    </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/finger.obj"/> -->
+        <box size=".01 .01 .11" />
       </geometry>
     </collision>
   </link>
@@ -214,9 +222,17 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
       <geometry>
-        <mesh filename="../../../model/panda/meshes/collision/finger.obj"/>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/finger.obj"/> -->
+        <box size=".01 .01 .11" />
       </geometry>
     </collision>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 3.14159265359" />
+      <geometry>
+        <!-- <mesh filename="../../../model/panda/meshes/collision/finger.obj"/> -->
+        <box size=".01 .01 .11" />
+      </geometry>
+    </visual>
   </link>
 
 
