@@ -80,6 +80,9 @@ int main() {
 	posori_task->_kp_ori = 400;
 	posori_task->_kv_ori = 40;
 
+	posori_task->_use_velocity_saturation_flag = true;  // adjust based on speed
+
+
 	// set the current EE posiiton as the desired EE position
 	// Current EE X position
 	Vector3d x = Vector3d::Zero(3);
@@ -124,11 +127,11 @@ int main() {
 	base_xyz << initial_q(0), initial_q(1), 0.0;
 	base_task->_desired_position = base_pose_desired;
 
-	// array of base poses
+	/// array of base poses
 	Vector3d base_pose_array[3];
 	base_pose_array[0] << -2.252, -2.542, 0.0;
-	// base_pose_array[1] << -4.5, -3.0, 0.0;
-	// base_pose_array[2] << -3.0, -1.0, 0.0;
+	base_pose_array[1] << -4.88, -1.576, 0;
+	base_pose_array[2] << -4.88, -2.22, 0;
 
 	// joint (posture) task
 	vector<int> arm_joint_selection{3, 4, 5, 6, 7, 8, 9};
@@ -163,6 +166,12 @@ int main() {
 	// double kp_gripper = 400;
 	// double kv_gripper = 40;
 
+	double arm_done = 0;
+
+	// redis keys
+	redis_client.createReadCallback(0);
+	redis_client.addDoubleToReadCallback(0, ARM_DONE_KEY, arm_done);
+
 	// set the desired posture
 	VectorXd gripper_desired = initial_q.tail(2);
 	gripper_desired << 0.02, -0.02;
@@ -176,10 +185,10 @@ int main() {
 	bool fTimerDidSleep = true;
 
 	Vector2d q_obs;
-	Vector2d vertex1 = Vector2d(-3.77, -2.6);
-	Vector2d vertex2 = Vector2d(-3.77, -0.9);
-	Vector2d vertex3 = Vector2d(-1.55, -0.9);
-	Vector2d vertex4 = Vector2d(-1.55, -2.6);
+	Vector2d vertex1 = Vector2d(-3.75, -2.5);
+	Vector2d vertex2 = Vector2d(-3.75, -1);
+	Vector2d vertex3 = Vector2d(-1.57, -1);
+	Vector2d vertex4 = Vector2d(-1.57, -2.5);
 
 	const int num = 10;
 	VectorXd obs_x = VectorXd::LinSpaced(num, vertex2[0], vertex3[0]);
@@ -211,8 +220,10 @@ int main() {
 	bool repulseOn = true;
 	double switch_time = 0;
 
-	int state = BASE_CONTROLLER;
+	int control_mode = BASE_CONTROLLER;
 	int counter = 0;
+
+	int state = 0;
 
 	base_pose_desired = base_pose_array[counter];
 
@@ -278,18 +289,38 @@ int main() {
 
 		robot->position(x, control_link, control_point);
 
-		
+		if (state == 0) {
+			xd = eef_pose_array[counter] + base_xyz;
+		} else if (state == 1) {
+			beta = 270;
+		} else {
+			beta = 180;
+		}
+		// FSM logic
+		// else if (state == 1) {
+		// 	xd = Vector3d(-0.7, 0.0, 0.4) + base_xyz;
+		// }
+		// else if (state == 2) {
+		// 	xd = Vector3d(-0.7, 0.0, 0.3) + base_xyz;
+		// }
+		// else {}
 
-		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && state == BASE_CONTROLLER) {
-			state = ARM_CONTROLLER;
+
+		if ((robot->_q.head(3) - base_pose_desired).norm() < 0.001 && control_mode == BASE_CONTROLLER) {
+			control_mode = ARM_CONTROLLER;
 			cout << robot->_q.head(3).transpose() << " reached!! BASE" << endl;
 		} 
 
-		if ((x - xd).norm() < 0.001 && state == ARM_CONTROLLER && ready) {
-			state = BASE_CONTROLLER;
+		if (control_mode == ARM_CONTROLLER && arm_done == 1) {
+			// if (state == 2) {
+			// 	gripper_desired << 0.02, -0.02;
+			// }
+			state++;
+			control_mode = BASE_CONTROLLER;
 			counter++;
 			base_pose_desired = base_pose_array[counter];
 			q_desired = robot->_q.segment(3, 7);
+			gripper_desired = q_gripper_desired;
 			cout << (x-base_xyz).transpose() << " reached!! ARM" << endl;
 			// reseting values
 
@@ -315,7 +346,7 @@ int main() {
 		//set controller inputs
 		
 
-		if (state == BASE_CONTROLLER) {
+		if (control_mode == BASE_CONTROLLER) {
 			posori_task->_desired_position = xd;
 			arm_joint_task->_desired_position = q_desired;
 			base_task->_desired_position = base_pose_desired;
@@ -325,6 +356,7 @@ int main() {
 			xd = eef_pose_array[counter] + base_xyz;
 
 			N_prec.setIdentity();
+			gripper_joint_task->updateTaskModel(N_prec);
 			base_task->updateTaskModel(N_prec);
 			N_prec = base_task->_N;		
 			arm_joint_task->updateTaskModel(N_prec);
@@ -351,10 +383,9 @@ int main() {
 			gripper_joint_task->computeTorques(gripper_torques);
 
 			command_torques = base_task_torques + base_task_torques_obs + arm_joint_task_torques + gripper_torques;
-
 		}
 
-		else if (state == ARM_CONTROLLER) {
+		else if (control_mode == ARM_CONTROLLER) {
 			// put arm control code here
 			//std::cout << "ARM" << std::endl;
 			posori_task->_desired_position += Vector3d(control_x_pos/10000, control_y_pos/10000, control_z_pos/10000);

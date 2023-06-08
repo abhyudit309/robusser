@@ -104,6 +104,9 @@ double control_x_ori = 0;
 double control_y_ori = 0;
 double control_z_ori = 0;
 
+bool button_pressed = false;
+double arm_done = 0;
+
 // camera modes 
 int CAMERA_MODE = 0;  // 0 for perspective, 1 for end-effector 
 Eigen::Vector3d starting_camera_pos;
@@ -139,7 +142,7 @@ int main() {
 	auto sim = new Simulation::Sai2Simulation(world_file, false);
 	sim->setCollisionRestitution(0);
 	sim->setCoeffFrictionStatic(1);
-	sim->setCoeffFrictionDynamic(1);
+	sim->setCoeffFrictionDynamic(2);
 	//sim->setCoeffFrictionStatic("platee2", 0.6);
 
 	// read joint positions, velocities, update model
@@ -350,6 +353,12 @@ int main() {
 		if (transYp) {
 			y_vel = 0.0005;
 		}
+		if (!button_pressed) {
+			arm_done = 0;
+		}
+		if (button_pressed) {
+			arm_done = 1;
+		}
 		if (transYn) {
 			y_vel = -0.0005;
 		}
@@ -480,6 +489,7 @@ void simulation(Sai2Model::Sai2Model* robot, Simulation::Sai2Simulation* sim, UI
 	redis_client.addDoubleToWriteCallback(0, ORI_Y_POS_KEY, control_y_ori);
 	redis_client.addDoubleToWriteCallback(0, ORI_Z_POS_KEY, control_z_ori);
 	redis_client.addDoubleToWriteCallback(0, GRIPPER_POS_KEY, control_grip_pos);
+	redis_client.addDoubleToWriteCallback(0, ARM_DONE_KEY, arm_done);
 
 	// create a timer
 	LoopTimer timer;
@@ -633,6 +643,9 @@ void keySelect(GLFWwindow* window, int key, int scancode, int action, int mods)
 			break;
 		case GLFW_KEY_M:
 			transZnEEOri = set;
+			break;
+		case GLFW_KEY_Q:
+			button_pressed = set;
 			break;
 		case GLFW_KEY_X:
 			transGpEE = set;
