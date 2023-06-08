@@ -14,6 +14,7 @@
 #include "timer/LoopTimer.h"
 #include <typeinfo>
 
+
 #include <GLFW/glfw3.h> //must be loaded after loading opengl/glew
 
 #include "uiforce/UIForceWidget.h"
@@ -114,8 +115,6 @@ double control_y_ori = 0;
 double control_z_ori = 0;
 
 int main() {
-
-
 	cout << "Loading URDF world model file: " << world_file << endl;
 
 	// start redis client
@@ -142,7 +141,9 @@ int main() {
 	// load simulation world
 	auto sim = new Simulation::Sai2Simulation(world_file, false);
 	sim->setCollisionRestitution(0);
-	sim->setCoeffFrictionStatic(0.6);
+
+	sim->setCoeffFrictionStatic(1);
+
 
 	// read joint positions, velocities, update model
 	sim->getJointPositions(robot_name, robot->_q);
@@ -209,6 +210,8 @@ int main() {
 	glewInitialize();
 
 	fSimulationRunning = true;
+	auto camera = graphics->getCamera(camera_name);
+	//camera->setStereomode();
 	thread sim_thread(simulation, robot, dishwasher, sim, ui_force_widget);
 	
 	// while window is open:
@@ -222,7 +225,9 @@ int main() {
 		for (int i = 0; i < n_objects; ++i) {
 			graphics->updateObjectGraphics(object_names[i], object_pos[i], object_ori[i]);
 		}
-		graphics->render(camera_name, width, height);
+		//graphics->render(camera_name, width, height);
+		camera->renderView(width, height);
+		
 
 		// swap buffers
 		glfwSwapBuffers(window);
