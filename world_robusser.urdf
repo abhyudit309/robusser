@@ -214,21 +214,21 @@
 	        </geometry>
 	    </visual>
 	</static_object>
+	<static_object name="extra">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/extra/extra.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
 	<static_object name="floor_one">
 		<origin xyz="0 0 -0.31" rpy="0 0 0" />
 	    <visual>
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-	            <mesh filename="../../robusser/components/floor_one/floor_one.obj" scale="20 20 20"/>
-	        </geometry>
-	    </visual>
-	</static_object>
-	<static_object name="floor_two">
-		<origin xyz="0 0 -0.31" rpy="0 0 0" />
-	    <visual>
-	        <origin xyz="0 0 0" rpy="0 0 0" />
-			<geometry>
-	            <mesh filename="../../robusser/components/floor_two/floor_two.obj" scale="20 20 20"/>
+	            <mesh filename="../../robusser/components/floor(1)/floor.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
@@ -571,6 +571,16 @@
 	        <origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
 	            <mesh filename="../../robusser/components/walls/walls.obj" scale="20 20 20"/>
+	        </geometry>
+	    </visual>
+	</static_object>
+
+	<static_object name="view">
+		<origin xyz="0 0 -0.31" rpy="0 0 0" />
+	    <visual>
+	        <origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+	            <mesh filename="../../robusser/components/view/view.obj" scale="20 20 20"/>
 	        </geometry>
 	    </visual>
 	</static_object>
